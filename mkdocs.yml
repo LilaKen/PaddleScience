@@ -54,6 +54,7 @@ nav:
         - Brusselator3D: zh/examples/brusselator3d.md
       - 技术科学(AI for Technology):
         - 流体:
+          - Transolver: zh/examples/transolver.md
           - AMGNet: zh/examples/amgnet.md
           - Aneurysm: zh/examples/aneurysm.md
           - BubbleNet: zh/examples/bubble.md
