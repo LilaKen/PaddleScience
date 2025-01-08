@@ -1,0 +1,423 @@
+import os
+import os.path as osp
+import random
+import sys
+import warnings
+
+import pytest
+import paddle
+import paddle.nn.functional as F
+
+import paddle_geometric.typing
+from paddle_geometric.data import Data
+from paddle_geometric.loader import NeighborLoader
+from paddle_geometric.nn import SAGEConv
+from paddle_geometric.nn.models import GAT, GCN, GIN, PNA, EdgeCNN, GraphSAGE
+from paddle_geometric.profile import benchmark
+from paddle_geometric.testing import (
+    onlyFullTest,
+    onlyLinux,
+    onlyNeighborSampler,
+    onlyOnline,
+    withDevice,
+    withPackage,
+)
+
+out_dims = [None, 8]
+dropouts = [0.0, 0.5]
+acts = [None, 'leaky_relu', paddle.relu_, F.elu, paddle.nn.ReLU()]
+norms = [None, 'batch_norm', 'layer_norm']
+jks = [None, 'last', 'cat', 'max', 'lstm']
+
+
+@pytest.mark.parametrize('out_dim', out_dims)
+@pytest.mark.parametrize('dropout', dropouts)
+@pytest.mark.parametrize('act', acts)
+@pytest.mark.parametrize('norm', norms)
+@pytest.mark.parametrize('jk', jks)
+def test_gcn(out_dim, dropout, act, norm, jk):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    out_channels = 16 if out_dim is None else out_dim
+
+    model = GCN(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
+                act=act, norm=norm, jk=jk)
+    assert str(model) == f'GCN(8, {out_channels}, num_layers=3)'
+    assert model(x, edge_index).shape== (3, out_channels)
+
+
+@pytest.mark.parametrize('out_dim', out_dims)
+@pytest.mark.parametrize('dropout', dropouts)
+@pytest.mark.parametrize('act', acts)
+@pytest.mark.parametrize('norm', norms)
+@pytest.mark.parametrize('jk', jks)
+def test_graph_sage(out_dim, dropout, act, norm, jk):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    out_channels = 16 if out_dim is None else out_dim
+
+    model = GraphSAGE(8, 16, num_layers=3, out_channels=out_dim,
+                      dropout=dropout, act=act, norm=norm, jk=jk)
+    assert str(model) == f'GraphSAGE(8, {out_channels}, num_layers=3)'
+    assert model(x, edge_index).shape== (3, out_channels)
+
+
+@pytest.mark.parametrize('out_dim', out_dims)
+@pytest.mark.parametrize('dropout', dropouts)
+@pytest.mark.parametrize('act', acts)
+@pytest.mark.parametrize('norm', norms)
+@pytest.mark.parametrize('jk', jks)
+def test_gin(out_dim, dropout, act, norm, jk):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    out_channels = 16 if out_dim is None else out_dim
+
+    model = GIN(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
+                act=act, norm=norm, jk=jk)
+    assert str(model) == f'GIN(8, {out_channels}, num_layers=3)'
+    assert model(x, edge_index).shape== (3, out_channels)
+
+
+@pytest.mark.parametrize('out_dim', out_dims)
+@pytest.mark.parametrize('dropout', dropouts)
+@pytest.mark.parametrize('act', acts)
+@pytest.mark.parametrize('norm', norms)
+@pytest.mark.parametrize('jk', jks)
+def test_gat(out_dim, dropout, act, norm, jk):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    out_channels = 16 if out_dim is None else out_dim
+
+    for v2 in [False, True]:
+        model = GAT(8, 16, num_layers=3, out_channels=out_dim, v2=v2,
+                    dropout=dropout, act=act, norm=norm, jk=jk)
+        assert str(model) == f'GAT(8, {out_channels}, num_layers=3)'
+        assert model(x, edge_index).shape== (3, out_channels)
+
+        model = GAT(8, 16, num_layers=3, out_channels=out_dim, v2=v2,
+                    dropout=dropout, act=act, norm=norm, jk=jk, heads=4)
+        assert str(model) == f'GAT(8, {out_channels}, num_layers=3)'
+        assert model(x, edge_index).shape== (3, out_channels)
+
+
+@pytest.mark.parametrize('out_dim', out_dims)
+@pytest.mark.parametrize('dropout', dropouts)
+@pytest.mark.parametrize('act', acts)
+@pytest.mark.parametrize('norm', norms)
+@pytest.mark.parametrize('jk', jks)
+def test_pna(out_dim, dropout, act, norm, jk):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    deg = paddle.to_tensor([0, 2, 1])
+    out_channels = 16 if out_dim is None else out_dim
+    aggregators = ['mean', 'min', 'max', 'std', 'var', 'sum']
+    scalers = [
+        'identity', 'amplification', 'attenuation', 'linear', 'inverse_linear'
+    ]
+
+    model = PNA(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
+                act=act, norm=norm, jk=jk, aggregators=aggregators,
+                scalers=scalers, deg=deg)
+    assert str(model) == f'PNA(8, {out_channels}, num_layers=3)'
+    assert model(x, edge_index).shape== (3, out_channels)
+
+
+@pytest.mark.parametrize('out_dim', out_dims)
+@pytest.mark.parametrize('dropout', dropouts)
+@pytest.mark.parametrize('act', acts)
+@pytest.mark.parametrize('norm', norms)
+@pytest.mark.parametrize('jk', jks)
+def test_edge_cnn(out_dim, dropout, act, norm, jk):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    out_channels = 16 if out_dim is None else out_dim
+
+    model = EdgeCNN(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
+                    act=act, norm=norm, jk=jk)
+    assert str(model) == f'EdgeCNN(8, {out_channels}, num_layers=3)'
+    assert model(x, edge_index).shape== (3, out_channels)
+
+
+def test_jit():
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+
+    model = GCN(8, 16, num_layers=2)
+    model = paddle.jit.to_static(model)
+
+    assert model(x, edge_index).shape== (3, 16)
+
+
+@pytest.mark.parametrize('out_dim', out_dims)
+@pytest.mark.parametrize('jk', jks)
+def test_one_layer_gnn(out_dim, jk):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    out_channels = 16 if out_dim is None else out_dim
+
+    model = GraphSAGE(8, 16, num_layers=1, out_channels=out_dim, jk=jk)
+    assert model(x, edge_index).shape== (3, out_channels)
+
+
+@pytest.mark.parametrize('norm', [
+    'BatchNorm',
+    'GraphNorm',
+    'InstanceNorm',
+    'LayerNorm',
+])
+def test_batch(norm):
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+    batch = paddle.to_tensor([0, 0, 1])
+
+    model = GraphSAGE(8, 16, num_layers=2, norm=norm)
+    assert model.supports_norm_batch == (norm != 'BatchNorm')
+
+    out = model(x, edge_index, batch=batch)
+    assert out.shape== (3, 16)
+
+    if model.supports_norm_batch:
+        with pytest.raises(RuntimeError, match="out of bounds"):
+            model(x, edge_index, batch=batch, batch_size=1)
+
+
+@onlyOnline
+@onlyNeighborSampler
+@pytest.mark.parametrize('jk', [None, 'last'])
+def test_basic_gnn_inference(get_dataset, jk):
+    dataset = get_dataset(name='karate')
+    data = dataset[0]
+
+    model = GraphSAGE(dataset.num_features, hidden_channels=16, num_layers=2,
+                      out_channels=dataset.num_classes, jk=jk)
+    model.eval()
+
+    out1 = model(data.x, data.edge_index)
+    assert out1.shape== (data.num_nodes, dataset.num_classes)
+
+    loader = NeighborLoader(data, num_neighbors=[-1], batch_size=128)
+    out2 = model.inference(loader)
+    assert out1.shape== out2.size()
+    assert paddle.allclose(out1, out2, atol=1e-4)
+
+    assert 'n_id' not in data
+
+
+@withDevice
+@onlyLinux
+@onlyFullTest
+@withPackage('paddle>=2.0.0')
+def test_compile_basic(device):
+    x = paddle.randn(shape=[3, 8, place=device])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]], place=device)
+
+    model = GCN(8, 16, num_layers=3).to(device)
+    compiled_model = paddle.compile(model)
+
+    expected = model(x, edge_index)
+    out = compiled_model(x, edge_index)
+    assert paddle.allclose(out, expected, atol=1e-6)
+
+
+def test_packaging():
+    if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+        return  # Unsupported Python version
+
+    warnings.filterwarnings('ignore', '.*TypedStorage is deprecated.*')
+
+    os.makedirs(paddle.hub._get_paddle_home(), exist_ok=True)
+
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
+
+    model = GraphSAGE(8, 16, num_layers=3)
+    path = osp.join(paddle.hub._get_paddle_home(), 'pyg_test_model.pdparams')
+    paddle.save(model, path)
+
+    model = paddle.load(path, weights_only=False)
+    with paddle.no_grad():
+        assert model(x, edge_index).shape== (3, 16)
+
+    model = GraphSAGE(8, 16, num_layers=3)
+    path = osp.join(paddle.hub._get_paddle_home(), 'pyg_test_package.pdparams')
+    with paddle.package.PackageExporter(path) as pe:
+        pe.extern('paddle_geometric.nn.**')
+        pe.extern('paddle_geometric.inspector')
+        pe.extern('paddle_geometric.utils._trim_to_layer')
+        pe.extern('_operator')
+        pe.save_pickle('models', 'model.pkl', model)
+
+    pi = paddle.package.PackageImporter(path)
+    model = pi.load_pickle('models', 'model.pkl')
+    with paddle.no_grad():
+        assert model(x, edge_index).shape== (3, 16)
+
+
+@withPackage('onnx', 'onnxruntime')
+def test_onnx(tmp_path):
+    import onnx
+    import onnxruntime as ort
+
+    warnings.filterwarnings('ignore', '.*tensor to a Python boolean.*')
+    warnings.filterwarnings('ignore', '.*shape inference of prim::Constant.*')
+
+    class MyModel(paddle.nn.Layer):
+        def __init__(self):
+            super().__init__()
+            self.conv1 = SAGEConv(8, 16)
+            self.conv2 = SAGEConv(16, 16)
+
+        def forward(self, x, edge_index):
+            x = self.conv1(x, edge_index).relu()
+            x = self.conv2(x, edge_index)
+            return x
+
+    model = MyModel()
+    x = paddle.randn(shape=[3, 8])
+    edge_index = paddle.to_tensor([[0, 1, 2], [1, 0, 2]])
+    expected = model(x, edge_index)
+    assert expected.shape== (3, 16)
+
+    path = osp.join(tmp_path, 'model.onnx')
+    paddle.onnx.export(model, (x, edge_index), path,
+                      input_names=('x', 'edge_index'), opset_version=16)
+
+    model = onnx.load(path)
+    onnx.checker.check_model(model)
+
+    providers = ['CPUExecutionProvider']
+    ort_session = ort.InferenceSession(path, providers=providers)
+
+    out = ort_session.run(None, {
+        'x': x.numpy(),
+        'edge_index': edge_index.numpy()
+    })[0]
+    out = paddle.from_numpy(out)
+    assert paddle.allclose(out, expected, atol=1e-6)
+
+
+@withPackage('pyg_lib')
+def test_trim_to_layer():
+    x = paddle.randn(shape=[14, 16])
+    edge_index = paddle.to_tensor([
+        [2, 3, 4, 5, 7, 7, 10, 11, 12, 13],
+        [0, 1, 2, 3, 2, 3, 7, 7, 7, 7],
+    ])
+    data = Data(x=x, edge_index=edge_index)
+
+    loader = NeighborLoader(
+        data,
+        num_neighbors=[1, 2, 4],
+        batch_size=2,
+        shuffle=False,
+    )
+    batch = next(iter(loader))
+
+    model = GraphSAGE(in_channels=16, hidden_channels=16, num_layers=3)
+    out1 = model(batch.x, batch.edge_index)[:2]
+    assert out1.shape== (2, 16)
+
+    out2 = model(
+        batch.x,
+        batch.edge_index,
+        num_sampled_nodes_per_hop=batch.num_sampled_nodes,
+        num_sampled_edges_per_hop=batch.num_sampled_edges,
+    )[:2]
+    assert out2.shape== (2, 16)
+
+    assert paddle.allclose(out1, out2, atol=1e-6)
+
+
+@withDevice
+@onlyLinux
+@withPackage('paddle>=2.1.0')
+@pytest.mark.parametrize('Model', [GCN, GraphSAGE, GIN, GAT, EdgeCNN, PNA])
+def test_compile_graph_breaks(Model, device):
+    import paddle._dynamo as dynamo
+
+    x = paddle.randn(shape=[3, 8, place=device])
+    edge_index = paddle.to_tensor([[0, 1, 1, 2], [1, 0, 2, 1]], place=device)
+
+    kwargs = {}
+    if Model in {GCN, GAT}:
+        # Adding self-loops inside the model leads to graph breaks :(
+        kwargs['add_self_loops'] = False
+
+    if Model in {PNA}:  # `PNA` requires additional arguments:
+        kwargs['aggregators'] = ['sum', 'mean', 'min', 'max', 'var', 'std']
+        kwargs['scalers'] = ['identity', 'amplification', 'attenuation']
+        kwargs['deg'] = paddle.to_tensor([1, 2, 1])
+
+    model = Model(
+        in_channels=8,
+        hidden_channels=16,
+        num_layers=2,
+        **kwargs,
+    ).to(device)
+
+    explanation = dynamo.explain(model)(x, edge_index)
+    assert explanation.graph_break_count == 0
+
+
+@withPackage('pyg_lib')
+def test_basic_gnn_cache():
+    x = paddle.randn(shape=[14, 16])
+    edge_index = paddle.to_tensor([
+        [2, 3, 4, 5, 7, 7, 10, 11, 12, 13],
+        [0, 1, 2, 3, 2, 3, 7, 7, 7, 7],
+    ])
+
+    loader = NeighborLoader(
+        Data(x=x, edge_index=edge_index),
+        num_neighbors=[-1],
+        batch_size=2,
+    )
+
+    model = GCN(in_channels=16, hidden_channels=16, num_layers=2)
+    model.eval()
+
+    out1 = model.inference(loader, cache=False)
+    out2 = model.inference(loader, cache=True)
+
+    assert paddle.allclose(out1, out2)
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--backward', action='store_true')
+    parser.add_argument('--dynamic', action='store_true')
+    args = parser.parse_args()
+
+    if args.dynamic:
+        min_num_nodes, max_num_nodes = 10_000, 15_000
+        min_num_edges, max_num_edges = 200_000, 300_000
+    else:
+        min_num_nodes, max_num_nodes = 10_000, 10_000
+        min_num_edges, max_num_edges = 200_000, 200_000
+
+    def gen_args():
+        N = random.randint(min_num_nodes, max_num_nodes)
+        E = random.randint(min_num_edges, max_num_edges)
+
+        x = paddle.randn(shape=[N, 64, place=args.device])
+        edge_index = paddle.randint(N, (2, E), place=args.device)
+
+        return x, edge_index
+
+    for Model in [GCN, GraphSAGE, GIN, EdgeCNN]:
+        print(f'Model: {Model.__name__}')
+
+        model = Model(64, 64, num_layers=3).to(args.device)
+        compiled_model = paddle.compile(model)
+
+        benchmark(
+            funcs=[model, compiled_model],
+            func_names=['Vanilla', 'Compiled'],
+            args=gen_args,
+            num_steps=50 if args.device == 'cpu' else 500,
+            num_warmups=10 if args.device == 'cpu' else 100,
+            backward=args.backward,
+        )
