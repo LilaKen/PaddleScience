@@ -24,7 +24,7 @@ from ppsci.utils import logger
 
 def train(cfg: DictConfig):
     # set seed
-    ppsci.utils.misc.set_random_seed(cfg.TRAIN.seed)
+    ppsci.utils.misc.set_random_seed(cfg.seed)
 
     # initialize logger
     logger.init_logger("ppsci", osp.join(cfg.output_dir, "train.log"), "info")
@@ -101,7 +101,7 @@ def train(cfg: DictConfig):
     # set optimizer
     lr_scheduler = ppsci.optimizer.lr_scheduler.ReduceOnPlateau(
         epochs=cfg.TRAIN.epochs,
-        iters_per_epoch=cfg.TRAIN.iters_per_epoch,
+        iters_per_epoch=(cfg.TRAIN.iters_per_epoch // cfg.TRAIN.batch_size + 1),
         learning_rate=cfg.ARGS.lr,
         mode=cfg.TRAIN.scheduler.mode,
         patience=cfg.TRAIN.scheduler.patience,
@@ -120,6 +120,7 @@ def train(cfg: DictConfig):
     # initialize solver
     solver = ppsci.solver.Solver(
         model=model,
+        iters_per_epoch=(cfg.TRAIN.iters_per_epoch // cfg.TRAIN.batch_size + 1),
         constraint=constraint,
         output_dir=cfg.output_dir,
         optimizer=optimizer,
@@ -138,7 +139,7 @@ def train(cfg: DictConfig):
 
 def evaluate(cfg: DictConfig):
     # set seed
-    ppsci.utils.misc.set_random_seed(cfg.TRAIN.seed)
+    ppsci.utils.misc.set_random_seed(cfg.seed)
 
     # initialize logger
     logger.init_logger("ppsci", osp.join(cfg.output_dir, "eval.log"), "info")
