@@ -69,6 +69,6 @@ ARGS:
   lr: 0.001
   optimizer: 'adam'
   # dataset settings
-  dataset_path: '../fsi/DrivAerNetPlusPlus_Processed_Point_Clouds_100k_paddle'
-  aero_coeff: '../fsi/AeroCoefficients_DrivAerNet_FilteredCorrected.csv'
-  subset_dir: '../fsi/subset_dir'
+  dataset_path: 'data/DrivAerNetPlusPlus_Processed_Point_Clouds_100k_paddle'
+  aero_coeff: 'data/AeroCoefficients_DrivAerNet_FilteredCorrected.csv'
+  subset_dir: 'data/subset_dir'
