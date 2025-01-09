@@ -101,7 +101,7 @@ def train(cfg: DictConfig):
     # set optimizer
     lr_scheduler = ppsci.optimizer.lr_scheduler.ReduceOnPlateau(
         epochs=cfg.TRAIN.epochs,
-        iters_per_epoch=(cfg.TRAIN.iters_per_epoch[0]//(paddle.distributed.get_world_size() * cfg.TRAIN.batch_size) + 1),
+        iters_per_epoch=(cfg.TRAIN.iters_per_epoch//(paddle.distributed.get_world_size() * cfg.TRAIN.batch_size) + 1),
         learning_rate=cfg.ARGS.lr,
         mode=cfg.TRAIN.scheduler.mode,
         patience=cfg.TRAIN.scheduler.patience,
@@ -120,7 +120,7 @@ def train(cfg: DictConfig):
     # initialize solver
     solver = ppsci.solver.Solver(
         model=model,
-        iters_per_epoch=(cfg.TRAIN.iters_per_epoch[0]//(paddle.distributed.get_world_size() * cfg.TRAIN.batch_size) + 1),
+        iters_per_epoch=(cfg.TRAIN.iters_per_epoch//(paddle.distributed.get_world_size() * cfg.TRAIN.batch_size) + 1),
         constraint=constraint,
         output_dir=cfg.output_dir,
         optimizer=optimizer,
