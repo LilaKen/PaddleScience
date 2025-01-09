@@ -1,14 +1,16 @@
 # DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction(DrivAerNet：一个用于数据驱动空气动力学设计和基于图的阻力预测的参数化汽车数据集)
 
 ## 论文信息:
-|年份 | 期刊 | 作者|引用数 | 论文PDF |
-|-----|-----|-----|---|-----|
-|2024|Design Automation Conference|Mohamed Elrefaie, Angela Dai, Faez Ahmed|3|DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction|
+
+| 年份 | 期刊                         | 作者                                     | 引用数 | 论文PDF                                                      |
+| ---- | ---------------------------- | ---------------------------------------- | ------ | ------------------------------------------------------------ |
+| 2024 | Design Automation Conference | Mohamed Elrefaie, Angela Dai, Faez Ahmed | 3      | DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction |
 
 ## 代码信息
-|问题类型 |神经网络|指标(相对误差)|
-|:-------:|:-------:|:-:|
-|点云预测空气阻力系数|RegDGCNN|     7.48%      |
+
+|       问题类型       | 神经网络 | 指标(相对误差) |
+| :------------------: | :------: | :------------: |
+| 点云预测空气阻力系数 | RegDGCNN |     7.48%      |
 
 === "模型训练命令"
 
@@ -88,9 +90,8 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 
 DrivAer模型快退模型的选择是由计算和实验参考的可用性来证明的，这使得本研究能够将本研究的结果与既定的数据[ 17、43 ]进行比较。在开始模拟之前，本研究对网格细化对结果的影响进行了初步评估。这涉及将三种不同网格分辨率下得到的阻力系数与实验值和参考模拟进行比较，详见表2。目的是在模拟精度和计算效率之间找到一个最佳的平衡。这种平衡是至关重要的，因为本研究的目标是生成一个用于训练深度学习模型的大规模数据集，这需要仿真结果的高保真度和可管理的磁盘存储和仿真时间，以适应广泛的计算需求。阻力系数$C_d$由方程确定：
 
-$$
-C_d=\frac{F_d}{\frac{1}{2}\rho u_\infty^2A_{\mathrm{ref}}}
-$$
+\(C_d = \frac{F_d}{\frac{1}{2} \rho u_\infty^2 A_{\mathrm{ref}}}\)
+
 物体所受的阻力$F_d$是其有效迎风面积$A_{ref}$、来流速度$u_\infty$和空气密度$\rho$的函数。该力由压力和摩擦力两部分组成。
 
 评估不仅包括阻力系数，还包括网格尺寸和所需的计算资源。仿真在装有AMD EPYC 7763 64 - Core处理器的机器上进行，共256个CPU核，4个Nvidia A100 80GB GPU。
@@ -104,9 +105,9 @@ $$
 **包括多样化的汽车外形尺寸和复杂的流动动力学：**与[ 36 ]的方法不同，所有的汽车模型都标准化为3.5米的统一长度，以适应预定义的计算域，本研究的数据集允许汽车尺寸的多样性，调整网格，边界框和每个设计的附加层。这种灵活性对于捕捉汽车周围复杂的流动动力学，包括流动分离、再附和回流区等现象，以及确保精确的气动力系数估计至关重要。这种方法解决了一些研究中观察到的数据集大小优先于模拟保真度的局限性，往往忽略了收敛、精确建模和适当的边界条件对于复杂三维模型的重要性。
 
 **车轮、侧反射镜和底盘的建模：**正如之前所强调的，大多数文献和可用的数据集往往忽略了车轮、侧镜和下半身的建模，如表1所示。相比之下，本研究的方法包括对这些组件的详细建模。图5说明了汽车上的速度分布：在这里，由于无滑移边界条件，车身显示零速度，而车轮显示非零速度。此外，该图可视化了汽车周围的流线，为包括这些特征的影响的流动动力学提供了见解。DrivAerNet数据集具有完整的三维流场信息，如图6a中的速度数据所示，此外，它还提供了汽车表面的压力分布。压力系数$C_p$由压差$p - p_\infty$与动压的比值$\frac{1}{2}\rho u^2$计算，具体表达式为：
-$$
-C_p=\frac{p-p_\infty}{\frac{1}{2}\rho u^2}
-$$
+
+\(C_p=\frac{p-p_\infty}{\frac{1}{2}\rho u^2}\)
+
 $C_p$在汽车表面的分布如图6b所示。
 
 ![table1](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/table1.jpg)
@@ -173,28 +174,22 @@ DrivAerNet数据集提供了一套全面的与汽车几何结构相关的空气�
 
 首先初始化具有节点特征X的图G，以及Edge Conv层参数θ和全连接层参数φ。RegDGCNN的一个显著特点是其在每个EdgeConv层中的动态图构建，其中每个节点的k近邻基于特征空间中的欧氏距离进行识别，从而自适应地更新图的连通性，以反映最重要的局部结构。EdgeConv操作定义为：
 
-$$
-h_{ij}=\Theta\left(x_i,x_j-x_i\right)
-$$
+\(h_{ij}=\Theta\left(x_i,x_j-x_i\right)\)
+
 通过使用共享的多层感知器( Multi-Layer感知器，MLP )来聚合来自这些邻居的信息来增强节点特征，该方法同时处理了单个节点特征及其与相邻节点的差异，有效地捕获了局部几何上下文。
 
 通过Edge Conv变换，进行全局特征聚合，将所有节点的特征聚合成一个奇异的全局特征向量：
 
-$$
-x_i^{\prime}=\max_{j\in\mathcal{N}(i)}h_{ij}
-$$
+\(x_i^{\prime}=\max_{j\in\mathcal{N}(i)}h_{ij}\)
+
 在这里，最大池化被用来封装图的整体信息。该全局特征向量随后通过几个FC层进行处理，其中包括ReLU和dropout等非线性激活函数，以分别引入非线性和防止过拟合。该架构最终形成了一个输出层，旨在适应手头的具体任务，例如对回归任务使用线性激活。
 
-$$
-h_{ij}=\mathrm{MLP}\left(
+$h_{ij}=\mathrm{MLP}\left(
 \begin{bmatrix}
 x_i,x_j-x_i
-\end{bmatrix}\right)
-$$
+\end{bmatrix}\right)$
 
-$$
-X^{\prime}=\max_{i\in\mathscr{G}}x_i^{\prime}
-$$
+\(X^{\prime}=\max_{i\in\mathscr{G}}x_i^{\prime}\)
 
 模型的性能通过使用均方误差( MSE )计算其预测输出与真实拖拽值之间的损失来量化，反向传播算法通过优化算法(如Adam [ 21 ] )调整模型参数θ和φ以最小化该损失。这一迭代精化过程凸显了RegDGCNN从图结构数据中动态利用和整合层次特征的能力。
 
@@ -359,6 +354,7 @@ examples/DrivAerNet/DrivAerNet.py:107:122
 ## 4. 完整代码
 
 === "DrivAerNet.py"
+
 ```
 --8<--
 examples/DrivAerNet/DrivAerNet.py:15:197
@@ -413,7 +409,7 @@ RegDGCNN的另一个限制是，在当前形式下，对于大规模点云，Reg
 
 7. [7] P. Baque, E. Remelli, F. Fleuret, and P. Fua. Geodesic convolutional shape optimization. In J. Dy and A. Krause, editors, Proceedings of the 35th International Conference on Machine Learning, volume 80 of Proceedings of Machine Learning Research, pages 472–481. PMLR, 10–15 Jul 2018.
 
-8.  [8] F. Bonnet, J. Mazari, P. Cinnella, and P. Gallinari. Airfrans: High fidelity computational fluid dynamics dataset for approximating reynolds-averaged navier–stokes solutions. Advances in Neural Information Processing Systems, 35:23463–23478, 2022.
+8. [8] F. Bonnet, J. Mazari, P. Cinnella, and P. Gallinari. Airfrans: High fidelity computational fluid dynamics dataset for approximating reynolds-averaged navier–stokes solutions. Advances in Neural Information Processing Systems, 35:23463–23478, 2022.
 
 9. [9] C. Brand, J. Anable, I. Ketsopoulou, and J. Watson. Road to zero or road to nowhere? disrupting transport and energy in a zero carbon world. Energy Policy, 139:111334, 2020.
 
