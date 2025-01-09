@@ -38,7 +38,7 @@ MODEL:
 
 # training settings
 TRAIN:
-  seed: 1
+  iters_per_epoch: 2776
   num_points: 5000
   epochs: 100
   num_workers: 32
