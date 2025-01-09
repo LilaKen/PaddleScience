@@ -1,3 +1,26 @@
+# Copyright (c) 2024 PaddlePaddle Authors. All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+Created on Tue Dec 19 20:54:56 2023
+
+@author: Mohamed Elrefaie, mohamed.elrefaie@mit.edu mohamed.elrefaie@tum.de
+
+This module is part of the research presented in the paper":
+"DrivAerNet: A Parametric Car Dataset for Data-driven Aerodynamic Design and Graph-Based Drag Prediction".
+"""
+
 import logging
 import os
 from typing import Callable
@@ -7,20 +30,6 @@ from typing import Tuple
 import numpy as np
 import paddle
 import pandas as pd
-
-"""
-Created on Tue Dec 19 20:54:56 2023
-
-@author: Mohamed Elrefaie, mohamed.elrefaie@mit.edu mohamed.elrefaie@tum.de
-
-This module is part of the research presented in the paper":
-"DrivAerNet: A Parametric Car Dataset for Data-driven Aerodynamic Design and Graph-Based Drag Prediction".
-
-The module defines a Paddle Dataset for loading and transforming 3D car models from the DrivAerNet dataset
-stored as STL files.
-It includes functionality to subsample or pad the vertices of the models to a fixed number of points as well as
-visualization methods for the DrivAerNet dataset.
-"""
 
 
 class DrivAerNetDataset(paddle.io.Dataset):
@@ -182,7 +191,7 @@ class DrivAerNetDataset(paddle.io.Dataset):
         return vertices
 
     def _load_point_cloud(self, design_id: str) -> Optional[paddle.Tensor]:
-        load_path = os.path.join(self.root_dir, f"{design_id}.pdparams")
+        load_path = os.path.join(self.root_dir, f"{design_id}.paddle_tensor")
         if os.path.exists(load_path) and os.path.getsize(load_path) > 0:
             try:
                 vertices = paddle.load(path=str(load_path))

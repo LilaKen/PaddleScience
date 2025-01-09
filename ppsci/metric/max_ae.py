@@ -62,15 +62,16 @@ class MaxAE(base.Metric):
     @paddle.no_grad()
     def forward(self, output_dict, label_dict) -> Dict[str, "paddle.Tensor"]:
         maxae_dict = {}
+
         for key in label_dict:
             # Calculate absolute error
             ae = paddle.abs(output_dict[key] - label_dict[key])
 
             if self.keep_batch:
                 # Take the maximum AE within each batch
-                maxae_dict[key] = ae.max(axis=tuple(range(1, ae.ndim)))
+                maxae_dict[key] = paddle.amax(ae, axis=tuple(range(1, ae.ndim)))
             else:
                 # Take the global maximum AE across all elements
-                maxae_dict[key] = ae.max()
+                maxae_dict[key] = paddle.amax(ae)
 
         return maxae_dict

@@ -33,6 +33,7 @@ __all__ = [
     "ExponentialDecay",
     "CosineWarmRestarts",
     "OneCycleLR",
+    "ReduceOnPlateau",
 ]
 
 
@@ -730,6 +731,53 @@ class OneCycleLR(LRBase):
             three_phase=self.three_phase,
             last_epoch=self.last_epoch,
             verbose=self.verbose,
+        )
+
+        if self.warmup_steps > 0:
+            learning_rate = self.linear_warmup(learning_rate)
+
+        setattr(learning_rate, "by_epoch", self.by_epoch)
+        return learning_rate
+
+
+class ReduceOnPlateau(LRBase):
+    def __init__(
+        self,
+        epochs: int,
+        iters_per_epoch: int,
+        learning_rate: float,
+        last_epoch: int = -1,
+        warmup_epoch: int = 0,
+        warmup_start_lr: float = 0.0,
+        mode: str = "min",
+        patience: int = 20,
+        factor: float = 1e-4,
+        verbose: bool = True,
+        by_epoch: bool = True,
+    ):
+        super().__init__(
+            epochs,
+            iters_per_epoch,
+            learning_rate,
+            warmup_epoch,
+            warmup_start_lr,
+            last_epoch,
+            by_epoch,
+        )
+        self.mode = mode
+        self.patience = patience
+        self.factor = factor
+        self.verbose = verbose
+        self.learning_rate = learning_rate
+        self.by_epoch = by_epoch
+
+    def __call__(self):
+        learning_rate = lr.ReduceOnPlateau(
+            mode=self.mode,
+            patience=self.patience,
+            factor=self.factor,
+            verbose=self.verbose,
+            learning_rate=self.learning_rate,
         )
 
         if self.warmup_steps > 0:

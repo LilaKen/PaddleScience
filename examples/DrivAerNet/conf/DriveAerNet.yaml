@@ -41,12 +41,12 @@ TRAIN:
   seed: 1
   num_points: 5000
   epochs: 100
-  num_workers: 2
+  num_workers: 32
   eval_during_train: True
   train_ids_file: "train_design_ids.txt"
   eval_ids_file: "val_design_ids.txt"
   batch_size: 1
-  train_fractions: 0.2
+  train_fractions: 1
   scheduler:
     mode: "min"
     patience: 20

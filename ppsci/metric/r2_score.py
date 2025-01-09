@@ -64,26 +64,34 @@ class R2Score(base.Metric):
         r2score_dict = {}
 
         for key in label_dict:
-            output = output_dict[key]
-            label = label_dict[key]
 
-            # Calculate mean of label
-            label_mean = label.mean(axis=-1, keepdim=True)
+            output = output_dict[key]
+            target = label_dict[key]
+
+            # Ensure the shapes of output and target match
+            if output.shape != target.shape:
+                raise ValueError(
+                    f"Output and target shapes do not match for key '{key}'. Output shape: {output.shape}, Target shape: {target.shape}"
+                )
+
+            output = output.flatten()
+            target = target.flatten()
+            # Calculate mean of target along the last dimension (features)
+            target_mean = target.mean(axis=-1, keepdim=True)
 
             # Calculate total sum of squares (TSS)
-            tss = ((label - label_mean) ** 2).sum(axis=-1)
+            ss_tot = paddle.sum(x=(target - target_mean) ** 2)
 
             # Calculate residual sum of squares (RSS)
-            rss = ((output - label) ** 2).sum(axis=-1)
+            ss_res = paddle.sum(x=(target - output) ** 2)
 
-            # Calculate R^2 score
-            r2score = 1 - (
-                rss / (tss + 1e-8)
-            )  # Add small epsilon to avoid division by zero
+            # Calculate R^2 score with numerical stability
+            r2 = 1 - (ss_res / (ss_tot + 1e-8))
 
+            # Handle batch-wise or mean R^2 based on self.keep_batch
             if self.keep_batch:
-                r2score_dict[key] = r2score
+                r2score_dict[key] = r2.unsqueeze(axis=0)
             else:
-                r2score_dict[key] = r2score.mean()
+                r2score_dict[key] = r2
 
         return r2score_dict

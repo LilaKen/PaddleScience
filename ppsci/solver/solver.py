@@ -637,7 +637,8 @@ class Solver:
 
             # update learning rate by epoch
             if self.lr_scheduler is not None and self.lr_scheduler.by_epoch:
-                self.lr_scheduler.step()
+                new_step = functools.partial(self.lr_scheduler.step, metrics=cur_metric)
+                new_step()
 
             # save epoch model every save_freq epochs
             if self.save_freq > 0 and epoch_id % self.save_freq == 0:
