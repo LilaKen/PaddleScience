@@ -55,7 +55,7 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 数据下载：
 ~~~bash
 ``` sh
-wget https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer%2B%2B/data.tar 
+wget https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer%2B%2B/data.tar
 tar -xvf data.tar
 ```
 ~~~
