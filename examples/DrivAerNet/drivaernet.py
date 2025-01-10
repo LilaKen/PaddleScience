@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import warnings
+from functools import partial
 
 import hydra
 import paddle
@@ -126,6 +127,9 @@ def train(cfg: DictConfig):
         eval_during_train=cfg.TRAIN.eval_during_train,
         eval_with_no_grad=cfg.EVAL.eval_with_no_grad,
     )
+
+    lr_scheduler.step = partial(lr_scheduler.step, metrics=solver.cur_metric)
+    solver.lr_scheduler = lr_scheduler
 
     # train model
     solver.train()
