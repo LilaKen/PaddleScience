@@ -332,6 +332,15 @@ class Solver:
             "metric": float("inf"),
             "epoch": 0,
         }
+
+        # use loss aggregator, use Sum if None
+        if isinstance(loss_aggregator, (mtl.AGDA, mtl.PCGrad)) and self.use_amp:
+            raise ValueError(
+                "Auto Mix Precision do not support AGDA, PCGrad loss aggregator yet, "
+                "please set use_amp=False."
+            )
+        self.loss_aggregator = loss_aggregator or mtl.Sum()
+
         # load model checkpoint, usually used for resume training
         if not cfg:
             self.checkpoint_path = checkpoint_path
@@ -477,14 +486,6 @@ class Solver:
         # whether enable static for forward pass. Defaults to False
         jit.enable_to_static(to_static)
         logger.message(f"Set to_static={to_static} for computational optimization.")
-
-        # use loss aggregator, use Sum if None
-        if isinstance(loss_aggregator, (mtl.AGDA, mtl.PCGrad)) and self.use_amp:
-            raise ValueError(
-                "Auto Mix Precision do not support AGDA, PCGrad loss aggregator yet, "
-                "please set use_amp=False."
-            )
-        self.loss_aggregator = loss_aggregator or mtl.Sum()
 
         # convert sympy to callable object if exist
         extra_parameters = []
@@ -637,10 +638,7 @@ class Solver:
 
             # update learning rate by epoch
             if self.lr_scheduler is not None and self.lr_scheduler.by_epoch:
-                self.cur_metric = cur_metric
-                self.lr_scheduler.step = functools.partial(
-                    self.lr_scheduler.step, metrics=self.cur_metric
-                )
+                self.lr_scheduler.step()
 
             # save epoch model every save_freq epochs
             if self.save_freq > 0 and epoch_id % self.save_freq == 0:
@@ -919,7 +917,6 @@ class Solver:
             self.model,
             input_spec=input_spec,
             full_graph=full_graph,
-            ignore_module=ignore_modules,
         )
 
         # save static graph model to disk
