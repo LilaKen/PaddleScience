@@ -6,25 +6,21 @@
 |2024|Design Automation Conference|Mohamed Elrefaie, Angela Dai, Faez Ahmed|3|DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction|
 
 ## 代码信息
-|问题类型 |神经网络|$R^2$|
+|预训练模型 |神经网络|指标|
 |:-------:|:-------:|:-:|
-|点云预测空气阻力系数|RegDGCNN|     87.5%      |
+|[CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams)|RegDGCNN|    $R^2$:87.5% |
 
 === "模型训练命令"
 
-~~~bash
-``` sh
-python DrivAerNet.py
-```
-~~~
+    ``` sh
+    python DrivAerNet.py
+    ```
 
 === "模型评估命令"
 
-~~~bash
-``` sh
-python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保存的模型权重”
-```
-~~~
+    ``` sh
+    python DrivAerNet.py mode=eval EVAL.pretrained_model_path=https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams
+    ```
 
 ## 1. 背景简介
 
@@ -40,9 +36,9 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 
 **总的来说，本研究的贡献是：**
 
-·发布了DrivAerNet，一个包含4000个汽车设计的广泛的高保真数据集，完整的具有详细的三维模型，每个模型有50万个表面网格，完整的三维流场和气动性能系数。该数据集比先前可获得的最大的汽车公开数据集大60 %，并且是唯一的也可以对车轮和车身进行建模的开源数据集，允许对阻力进行准确的估计。
+- 发布了DrivAerNet，一个包含4000个汽车设计的广泛的高保真数据集，完整的具有详细的三维模型，每个模型有50万个表面网格，完整的三维流场和气动性能系数。该数据集比先前可获得的最大的汽车公开数据集大60 %，并且是唯一的也可以对车轮和车身进行建模的开源数据集，允许对阻力进行准确的估计。
 
-·引入了一种基于动态图卷积神经网络的代理模型，命名为RegDGCNN，用于气动阻力的预测。在ShapeNet基准数据集上，RegDGCNN在使用1000 ×更少参数的情况下，拖拽预测性能比目前最先进的基于注意力机制的模型提升了3.57 %，取得了较好的效果。
+- 引入了一种基于动态图卷积神经网络的代理模型，命名为RegDGCNN，用于气动阻力的预测。在ShapeNet基准数据集上，RegDGCNN在使用1000 ×更少参数的情况下，拖拽预测性能比目前最先进的基于注意力机制的模型提升了3.57 %，取得了较好的效果。
 
 此外，本研究的数据集规模较大，这表明将训练数据集从DrivAerNet中的560个汽车设计扩展到2800个汽车设计后，误差降低了75 %，说明了数据集规模与模型性能之间的直接相关性。进一步验证了本研究模型的有效性和大型数据集在代理模型建模中的内在价值。
 
@@ -53,12 +49,10 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 ## 2. 问题定义
 
 数据下载：
-~~~bash
-``` sh
-wget https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer%2B%2B/data.tar
-tar -xvf data.tar
-```
-~~~
+    ``` sh
+    wget https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer%2B%2B/data.tar
+    tar -xvf data.tar
+    ```
 
 
 ![fig1](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig1.jpg)
@@ -146,13 +140,13 @@ DrivAerNet数据集提供了一套全面的与汽车几何结构相关的空气�
 
 该数据集包括：
 
-·综合CFD模拟数据~16TB
+- 综合CFD模拟数据~16TB
 
-· CFD模拟的固化版本~1TB
+- CFD模拟的固化版本~1TB
 
-· 4000辆汽车设计的3D网格和相应的气动性能系数( $C_d、C_l、C_{l,r}、C_{l,f}、C_m$)~84GB
+- 4000辆汽车设计的3D网格和相应的气动性能系数( $C_d、C_l、C_{l,r}、C_{l,f}、C_m$)~84GB
 
-· 2D切片包括汽车x方向的尾流和y方向的对称面~12GB。
+- 2D切片包括汽车x方向的尾流和y方向的对称面~12GB。
 
 **Drivaernet中汽车设计之间的气动性能变异性：**图7展示了DrivAerNet数据集中阻力系数($C_d$ )和各种升力系数( $C_l、C_{l,r}、C_{l,f}$)之间关系的三个散点图。数据被划分为训练集、验证集和测试集，其中70 %用于训练，15 %用于验证和测试。这样的划分对于模型训练过程的完整性和后续的性能评估至关重要。
 
@@ -258,13 +252,13 @@ $$
 
 该图还表明，与ShapeNet数据集相比，RegDGCNN在DrivAerNet数据集上获得了更好的性能。这可归因于几个因素：
 
-· Shape Net中形状的巨大变化与足够数量的样本不对应，无法涵盖整个气动阻力值范围；
+- Shape Net中形状的巨大变化与足够数量的样本不对应，无法涵盖整个气动阻力值范围；
 
-· Shape Net模型将汽车建模为单体式实体，省略了车轮和车身等关键细节，而这些细节对于准确的气动建模至关重要。
+- Shape Net模型将汽车建模为单体式实体，省略了车轮和车身等关键细节，而这些细节对于准确的气动建模至关重要。
 
-· ShapeNet中的所有阻力值都是使用单一的参考区域计算的，这并不能解释不同汽车设计的正面投影面积的显著变化。
+- ShapeNet中的所有阻力值都是使用单一的参考区域计算的，这并不能解释不同汽车设计的正面投影面积的显著变化。
 
-·在ShapeNet数据集中，网格分辨率有很大的变化，这可能导致气动预测的不一致。
+- 在ShapeNet数据集中，网格分辨率有很大的变化，这可能导致气动预测的不一致。
 
 这一分析旨在展示本研究的模型的泛化能力，强调开发有效泛化到域外分布的模型的目标。
 
