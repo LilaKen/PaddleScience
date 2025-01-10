@@ -208,8 +208,9 @@ class DrivAerNetDataset(paddle.io.Dataset):
 
                 return vertices
             except (EOFError, RuntimeError, ValueError) as e:
-                print(f"Error loading point cloud from {load_path}: {e}")
-                return e
+                raise Exception(
+                    f"Error loading point cloud from {load_path}: {e}"
+                ) from e
 
     def __getitem__(self, idx: int, apply_augmentations: bool = True):
         """
