@@ -35,6 +35,7 @@ from ppsci.arch.epnn import Epnn  # isort:skip
 from ppsci.arch.extformer_moe_cuboid import ExtFormerMoECuboid  # isort:skip
 from ppsci.arch.gan import Discriminator  # isort:skip
 from ppsci.arch.gan import Generator  # isort:skip
+from ppsci.arch.geofno import FNO1d  # isort:skip
 from ppsci.arch.graphcast import GraphCastNet  # isort:skip
 from ppsci.arch.he_deeponets import HEDeepONets  # isort:skip
 from ppsci.arch.lno import LNO  # isort:skip
@@ -49,6 +50,7 @@ from ppsci.arch.physx_transformer import PhysformerGPT2  # isort:skip
 from ppsci.arch.sfnonet import SFNONet  # isort:skip
 from ppsci.arch.spinn import SPINN  # isort:skip
 from ppsci.arch.tfnonet import TFNO1dNet, TFNO2dNet, TFNO3dNet  # isort:skip
+from ppsci.arch.transformer import Transformer  # isort:skip
 from ppsci.arch.unetex import UNetEx  # isort:skip
 from ppsci.arch.unonet import UNONet  # isort:skip
 from ppsci.arch.uscnn import USCNN  # isort:skip
@@ -80,6 +82,7 @@ __all__ = [
     "Discriminator",
     "Epnn",
     "ExtFormerMoECuboid",
+    "FNO1d",
     "Generator",
     "GraphCastNet",
     "HEDeepONets",
@@ -99,6 +102,7 @@ __all__ = [
     "TFNO1dNet",
     "TFNO2dNet",
     "TFNO3dNet",
+    "Transformer",
     "UNetEx",
     "UNONet",
     "USCNN",
