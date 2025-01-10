@@ -211,11 +211,7 @@ class DrivAerNetDataset(paddle.io.Dataset):
                 print(f"Error loading point cloud from {load_path}: {e}")
                 return e
 
-    def __getitem__(
-        self, idx: int, apply_augmentations: bool = True
-    ) -> tuple[
-        dict[str, paddle.Tensor], dict[str, paddle.Tensor], dict[str, paddle.Tensor]
-    ]:
+    def __getitem__(self, idx: int, apply_augmentations: bool = True):
         """
         Retrieves a sample and its corresponding label from the dataset, with an option to apply augmentations.
 
@@ -249,15 +245,15 @@ class DrivAerNetDataset(paddle.io.Dataset):
 
         if self.transform:
             vertices = self.transform(vertices)
-        cd_value = paddle.to_tensor(data=float(cd_value), dtype="float32").reshape([-1])
+        cd_value = np.array(float(cd_value), dtype=np.float32).reshape([-1])
         self.cache[idx] = (
             {self.input_keys[0]: vertices},
             {self.label_keys[0]: cd_value},
-            {self.weight_keys[0]: paddle.to_tensor(1)},
+            {self.weight_keys[0]: np.array(1, dtype=np.float32)},
         )
 
         return (
             {self.input_keys[0]: vertices},
             {self.label_keys[0]: cd_value},
-            {self.weight_keys[0]: paddle.to_tensor(1)},
+            {self.weight_keys[0]: np.array(1, dtype=np.float32)},
         )
