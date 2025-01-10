@@ -31,4 +31,5 @@
         - SEVIRDataset
         - MOlFLOWDataset
         - CGCNNDataset
+        - DrivAerNetDataset
       show_root_heading: true
