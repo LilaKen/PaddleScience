@@ -1,16 +1,14 @@
 # DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction(DrivAerNet：一个用于数据驱动空气动力学设计和基于图的阻力预测的参数化汽车数据集)
 
 ## 论文信息:
-
-| 年份 | 期刊                         | 作者                                     | 引用数 | 论文PDF                                                      |
-| ---- | ---------------------------- | ---------------------------------------- | ------ | ------------------------------------------------------------ |
-| 2024 | Design Automation Conference | Mohamed Elrefaie, Angela Dai, Faez Ahmed | 3      | DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction |
+|年份 | 期刊 | 作者|引用数 | 论文PDF |
+|-----|-----|-----|---|-----|
+|2024|Design Automation Conference|Mohamed Elrefaie, Angela Dai, Faez Ahmed|3|DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction|
 
 ## 代码信息
-
-|       问题类型       | 神经网络 | 指标(相对误差) |
-| :------------------: | :------: | :------------: |
-| 点云预测空气阻力系数 | RegDGCNN |     7.48%      |
+|问题类型 |神经网络|$R^2$|
+|:-------:|:-------:|:-:|
+|点云预测空气阻力系数|RegDGCNN|     87.5%      |
 
 === "模型训练命令"
 
@@ -54,6 +52,15 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 
 ## 2. 问题定义
 
+数据下载：
+~~~bash
+``` sh
+wget https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer%2B%2B/data.tar 
+tar -xvf data.tar
+```
+~~~
+
+
 ![fig1](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig1.jpg)
 
 图1：参数化的DrivAer模型使用变形盒子在ANSA 软件中进行几何变换，总共使用了50个几何参数和32个可变形实体。对变形框进行颜色编码，突出易受参数修改影响的区域，便于创建" DrivAerNet "数据集。利用这种变形技术，本研究生成了4000个独特的汽车设计。
@@ -90,7 +97,9 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 
 DrivAer模型快退模型的选择是由计算和实验参考的可用性来证明的，这使得本研究能够将本研究的结果与既定的数据[ 17、43 ]进行比较。在开始模拟之前，本研究对网格细化对结果的影响进行了初步评估。这涉及将三种不同网格分辨率下得到的阻力系数与实验值和参考模拟进行比较，详见表2。目的是在模拟精度和计算效率之间找到一个最佳的平衡。这种平衡是至关重要的，因为本研究的目标是生成一个用于训练深度学习模型的大规模数据集，这需要仿真结果的高保真度和可管理的磁盘存储和仿真时间，以适应广泛的计算需求。阻力系数$C_d$由方程确定：
 
-\(C_d = \frac{F_d}{\frac{1}{2} \rho u_\infty^2 A_{\mathrm{ref}}}\)
+$$
+C_d = \frac{F_d}{\frac{1}{2} \rho u_\infty^2 A_{\mathrm{ref}}}
+$$
 
 物体所受的阻力$F_d$是其有效迎风面积$A_{ref}$、来流速度$u_\infty$和空气密度$\rho$的函数。该力由压力和摩擦力两部分组成。
 
@@ -106,7 +115,10 @@ DrivAer模型快退模型的选择是由计算和实验参考的可用性来证�
 
 **车轮、侧反射镜和底盘的建模：**正如之前所强调的，大多数文献和可用的数据集往往忽略了车轮、侧镜和下半身的建模，如表1所示。相比之下，本研究的方法包括对这些组件的详细建模。图5说明了汽车上的速度分布：在这里，由于无滑移边界条件，车身显示零速度，而车轮显示非零速度。此外，该图可视化了汽车周围的流线，为包括这些特征的影响的流动动力学提供了见解。DrivAerNet数据集具有完整的三维流场信息，如图6a中的速度数据所示，此外，它还提供了汽车表面的压力分布。压力系数$C_p$由压差$p - p_\infty$与动压的比值$\frac{1}{2}\rho u^2$计算，具体表达式为：
 
-\(C_p=\frac{p-p_\infty}{\frac{1}{2}\rho u^2}\)
+
+$$
+C_p=\frac{p-p_\infty}{\frac{1}{2}\rho u^2}
+$$
 
 $C_p$在汽车表面的分布如图6b所示。
 
@@ -174,22 +186,31 @@ DrivAerNet数据集提供了一套全面的与汽车几何结构相关的空气�
 
 首先初始化具有节点特征X的图G，以及Edge Conv层参数θ和全连接层参数φ。RegDGCNN的一个显著特点是其在每个EdgeConv层中的动态图构建，其中每个节点的k近邻基于特征空间中的欧氏距离进行识别，从而自适应地更新图的连通性，以反映最重要的局部结构。EdgeConv操作定义为：
 
-\(h_{ij}=\Theta\left(x_i,x_j-x_i\right)\)
+$$
+h_{ij}=\Theta\left(x_i,x_j-x_i\right)
+$$
+
 
 通过使用共享的多层感知器( Multi-Layer感知器，MLP )来聚合来自这些邻居的信息来增强节点特征，该方法同时处理了单个节点特征及其与相邻节点的差异，有效地捕获了局部几何上下文。
 
 通过Edge Conv变换，进行全局特征聚合，将所有节点的特征聚合成一个奇异的全局特征向量：
 
-\(x_i^{\prime}=\max_{j\in\mathcal{N}(i)}h_{ij}\)
+$$
+x_i^{\prime}=\max_{j\in\mathcal{N}(i)}h_{ij}
+$$
 
 在这里，最大池化被用来封装图的整体信息。该全局特征向量随后通过几个FC层进行处理，其中包括ReLU和dropout等非线性激活函数，以分别引入非线性和防止过拟合。该架构最终形成了一个输出层，旨在适应手头的具体任务，例如对回归任务使用线性激活。
 
-$h_{ij}=\mathrm{MLP}\left(
+$$
+h_{ij}=\mathrm{MLP}\left(
 \begin{bmatrix}
 x_i,x_j-x_i
-\end{bmatrix}\right)$
+\end{bmatrix}\right)
+$$
 
-\(X^{\prime}=\max_{i\in\mathscr{G}}x_i^{\prime}\)
+$$
+X^{\prime}=\max_{i\in\mathscr{G}}x_i^{\prime}
+$$
 
 模型的性能通过使用均方误差( MSE )计算其预测输出与真实拖拽值之间的损失来量化，反向传播算法通过优化算法(如Adam [ 21 ] )调整模型参数θ和φ以最小化该损失。这一迭代精化过程凸显了RegDGCNN从图结构数据中动态利用和整合层次特征的能力。
 
@@ -261,9 +282,9 @@ x_i,x_j-x_i
 
 用于对点云进行随机变换，包括平移、加噪声和随机丢点，以提升模型的泛化能力。
 
-```
+``` py linenums="46"
 --8<--
-ppsci/arch/regdgcnn.py:30:93
+ppsci/arch/regdgcnn.py:46:112
 --8<--
 ```
 
@@ -271,9 +292,9 @@ ppsci/arch/regdgcnn.py:30:93
 
 用于加载 DrivAerNet 数据集，并处理点云数据（如采样、增强和归一化）。
 
-```
+``` py linenums="35"
 --8<--
-ppsci/arch/regdgcnn.py:25:232
+ppsci/data/dataset/drivaernet_dataset.py:35:261
 --8<--
 ```
 
@@ -313,9 +334,9 @@ MODEL:
 
 由于我们以监督学习方式进行训练，此处采用监督约束 `SupervisedConstraint`：
 
-```
+``` py linenums="34"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:36:63
+examples/DrivAerNet/DrivAerNet.py:34:58
 --8<--
 ```
 
@@ -323,9 +344,9 @@ examples/DrivAerNet/DrivAerNet.py:36:63
 
 优化器是模型训练中的关键部分，用于通过梯度下降法（或其他算法）调整模型参数。在本场景中，使用了`Adam`和`SGD`优化器，并通过学习率调度器来动态调整学习率。
 
-```
+``` py linenums="86"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:96:104
+examples/DrivAerNet/DrivAerNet.py:86:109
 --8<--
 ```
 
@@ -333,9 +354,9 @@ examples/DrivAerNet/DrivAerNet.py:96:104
 
 在训练过程中通常会按一定轮数间隔，用验证集（测试集）评估当前模型的训练情况，因此使用 `ppsci.validate.SupervisedValidator` 构建评估器。
 
-```
+``` py linenums="60"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:65:93
+examples/DrivAerNet/DrivAerNet.py:60:81
 --8<--
 ```
 
@@ -345,19 +366,18 @@ examples/DrivAerNet/DrivAerNet.py:65:93
 
 完成上述设置之后，只需要将上述实例化的对象按顺序传递给 `ppsci.solver.Solver`，然后启动训练、评估。
 
-```
+``` py linenums="112"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:107:122
+examples/DrivAerNet/DrivAerNet.py:112:128
 --8<--
 ```
 
 ## 4. 完整代码
 
 === "DrivAerNet.py"
-
-```
+``` py linenums="15"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:15:197
+examples/DrivAerNet/DrivAerNet.py:15:200
 --8<--
 ```
 
@@ -395,88 +415,88 @@ RegDGCNN的另一个限制是，在当前形式下，对于大规模点云，Reg
 
 参考文献列表
 
-1. [1] A. Abbas, A. Rafiee, M. Haase, and A. Malcolm. Geometrical deep learning for performance prediction of high-speed craft. Ocean Engineering, 258:111716, 2022.
+[1] A. Abbas, A. Rafiee, M. Haase, and A. Malcolm. Geometrical deep learning for performance prediction of high-speed craft. Ocean Engineering, 258:111716, 2022.
 
-2. [2] S. R. Ahmed, G. Ramm, and G. Faltin. Some salient features of the time -averaged ground vehicle wake. SAE Transactions, 93:473–503, 1984.
+[2] S. R. Ahmed, G. Ramm, and G. Faltin. Some salient features of the time -averaged ground vehicle wake. SAE Transactions, 93:473–503, 1984.
 
-3. [3] N. Arechiga, F. Permenter, B. Song, and C. Yuan. Drag-guided diffusion models for vehicle image generation. arXiv preprint arXiv:2306.09935, 6 2023.
+[3] N. Arechiga, F. Permenter, B. Song, and C. Yuan. Drag-guided diffusion models for vehicle image generation. arXiv preprint arXiv:2306.09935, 6 2023.
 
-4. [4] N. Ashton, P. Batten, A. Cary, and K. Holst. Summary of the 4th high-lift prediction workshop hybrid rans/les technology focus group. Journal of Aircraft, pages 1–30, 2023.
+[4] N. Ashton, P. Batten, A. Cary, and K. Holst. Summary of the 4th high-lift prediction workshop hybrid rans/les technology focus group. Journal of Aircraft, pages 1–30, 2023.
 
-5. [5] N. Ashton and W. van Noordt. Overview and summary of the first automotive cfd prediction workshop: Drivaer model. SAE International Journal of Commercial Vehicles, 16(02-16-01-0005), 2022.
+[5] N. Ashton and W. van Noordt. Overview and summary of the first automotive cfd prediction workshop: Drivaer model. SAE International Journal of Commercial Vehicles, 16(02-16-01-0005), 2022.
 
-6. [6] M. Aultman, Z. Wang, R. Auza-Gutierrez, and L. Duan. Evaluation of cfd methodologies for prediction of flows around simplified and complex automotive models. Computers & Fluids, 236:105297, 2022.
+[6] M. Aultman, Z. Wang, R. Auza-Gutierrez, and L. Duan. Evaluation of cfd methodologies for prediction of flows around simplified and complex automotive models. Computers & Fluids, 236:105297, 2022.
 
-7. [7] P. Baque, E. Remelli, F. Fleuret, and P. Fua. Geodesic convolutional shape optimization. In J. Dy and A. Krause, editors, Proceedings of the 35th International Conference on Machine Learning, volume 80 of Proceedings of Machine Learning Research, pages 472–481. PMLR, 10–15 Jul 2018.
+[7] P. Baque, E. Remelli, F. Fleuret, and P. Fua. Geodesic convolutional shape optimization. In J. Dy and A. Krause, editors, Proceedings of the 35th International Conference on Machine Learning, volume 80 of Proceedings of Machine Learning Research, pages 472–481. PMLR, 10–15 Jul 2018.
 
-8. [8] F. Bonnet, J. Mazari, P. Cinnella, and P. Gallinari. Airfrans: High fidelity computational fluid dynamics dataset for approximating reynolds-averaged navier–stokes solutions. Advances in Neural Information Processing Systems, 35:23463–23478, 2022.
+[8] F. Bonnet, J. Mazari, P. Cinnella, and P. Gallinari. Airfrans: High fidelity computational fluid dynamics dataset for approximating reynolds-averaged navier–stokes solutions. Advances in Neural Information Processing Systems, 35:23463–23478, 2022.
 
-9. [9] C. Brand, J. Anable, I. Ketsopoulou, and J. Watson. Road to zero or road to nowhere? disrupting transport and energy in a zero carbon world. Energy Policy, 139:111334, 2020.
+[9] C. Brand, J. Anable, I. Ketsopoulou, and J. Watson. Road to zero or road to nowhere? disrupting transport and energy in a zero carbon world. Energy Policy, 139:111334, 2020.
 
-10. [10] A. X. Chang, T. Funkhouser, L. Guibas, P. Hanrahan, Q. Huang, Z. Li, S. Savarese, M. Savva, S. Song, H. Su, et al. Shapenet: An information-rich 3d model repository. arXiv preprint arXiv:1512.03012, 2015.
+[10] A. X. Chang, T. Funkhouser, L. Guibas, P. Hanrahan, Q. Huang, Z. Li, S. Savarese, M. Savva, S. Song, H. Su, et al. Shapenet: An information-rich 3d model repository. arXiv preprint arXiv:1512.03012, 2015.
 
-11. [11] A. Cogotti. A parametric study on the ground effect of a simplified car model. SAE transactions, pages 180–204, 1998.
+[11] A. Cogotti. A parametric study on the ground effect of a simplified car model. SAE transactions, pages 180–204, 1998.
 
-12. [12] G. Damblin, M. Couplet, and B. Iooss. Numerical studies of space-filling designs: optimization of latin hypercube samples and subprojection properties. Journal of Simulation, 7(4):276–289, 2013.
+[12] G. Damblin, M. Couplet, and B. Iooss. Numerical studies of space-filling designs: optimization of latin hypercube samples and subprojection properties. Journal of Simulation, 7(4):276–289, 2013.
 
-13. [13] J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei. Imagenet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition, pages 248–255. Ieee, 2009.
+[13] J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei. Imagenet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition, pages 248–255. Ieee, 2009.
 
-14. [14] M. Elrefaie, T. Ayman, M. A. Elrefaie, E. Sayed, M. Ayyad, and M. M. AbdelRahman. Surrogate modeling of the aerodynamic performance for airfoils in transonic regime. In AIAA SCITECH 2024 Forum, page 2220, 2024.
+[14] M. Elrefaie, T. Ayman, M. A. Elrefaie, E. Sayed, M. Ayyad, and M. M. AbdelRahman. Surrogate modeling of the aerodynamic performance for airfoils in transonic regime. In AIAA SCITECH 2024 Forum, page 2220, 2024.
 
-15. [15] M. Elrefaie, S. Hüttig, M. Gladkova, T. Gericke, D. Cremers, and C. Breitsamter. Real-time and on-site aerodynamics using stereoscopic piv and deep optical flow learning. arXiv preprint arXiv:2401.09932, 2024.
+[15] M. Elrefaie, S. Hüttig, M. Gladkova, T. Gericke, D. Cremers, and C. Breitsamter. Real-time and on-site aerodynamics using stereoscopic piv and deep optical flow learning. arXiv preprint arXiv:2401.09932, 2024.
 
-16. [16] E. Gunpinar, U. C. Coskun, M. Ozsipahi, and S. Gunpinar. A generative design and drag coefficient prediction system for sedan car side silhouettes based on computational fluid dynamics. CAD Computer Aided Design, 111:65–79, 6 2019.
+[16] E. Gunpinar, U. C. Coskun, M. Ozsipahi, and S. Gunpinar. A generative design and drag coefficient prediction system for sedan car side silhouettes based on computational fluid dynamics. CAD Computer Aided Design, 111:65–79, 6 2019.
 
-17. [17] A. I. Heft, T. Indinger, and N. A. Adams. Experimental and numerical investigation of the drivaer model. In Fluids Engineering Division Summer Meeting, volume 44755, pages 41–51. American Society of Mechanical Engineers, 2012.
+[17] A. I. Heft, T. Indinger, and N. A. Adams. Experimental and numerical investigation of the drivaer model. In Fluids Engineering Division Summer Meeting, volume 44755, pages 41–51. American Society of Mechanical Engineers, 2012.
 
-18. [18] A. I. Heft, T. Indinger, and N. A. Adams. Introduction of a new realistic generic car model for aerodynamic investigations. Technical report, SAE Technical Paper, 2012.
+[18] A. I. Heft, T. Indinger, and N. A. Adams. Introduction of a new realistic generic car model for aerodynamic investigations. Technical report, SAE Technical Paper, 2012.
 
-19. [19] S. J. Jacob, M. Mrosek, C. Othmer, and H. Köstler. Deep learning for realtime aerodynamic evaluations of arbitrary vehicle shapes. SAE International Journal of Passenger Vehicle Systems, 15(2):77–90, mar 2022.
+[19] S. J. Jacob, M. Mrosek, C. Othmer, and H. Köstler. Deep learning for realtime aerodynamic evaluations of arbitrary vehicle shapes. SAE International Journal of Passenger Vehicle Systems, 15(2):77–90, mar 2022.
 
-20. [20] A. Kashefi and T. Mukerji. Physics-informed pointnet: A deep learning solver for steady-state incompressible flows and thermal fields on multiple sets of irregular geometries. Journal of Computational Physics, 468:111510, 2022.
+[20] A. Kashefi and T. Mukerji. Physics-informed pointnet: A deep learning solver for steady-state incompressible flows and thermal fields on multiple sets of irregular geometries. Journal of Computational Physics, 468:111510, 2022.
 
-21. [21] D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980, 2014.
+[21] D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980, 2014.
 
-22. [22] Z. Li, N. B. Kovachki, C. Choy, B. Li, J. Kossaifi, S. P. Otta, M. A. Nabian, M. Stadler, C. Hundt, K. Azizzadenesheli, and A. Anandkumar. Geometryinformed neural operator for large-scale 3d pdes, 2023.
+[22] Z. Li, N. B. Kovachki, C. Choy, B. Li, J. Kossaifi, S. P. Otta, M. A. Nabian, M. Stadler, C. Hundt, K. Azizzadenesheli, and A. Anandkumar. Geometryinformed neural operator for large-scale 3d pdes, 2023.
 
-23. [23] H. Martins, C. Henriques, J. Figueira, C. Silva, and A. Costa. Assessing policy interventions to stimulate the transition of electric vehicle technology in the european union. Socio-Economic Planning Sciences, 87:101505, 2023.
+[23] H. Martins, C. Henriques, J. Figueira, C. Silva, and A. Costa. Assessing policy interventions to stimulate the transition of electric vehicle technology in the european union. Socio-Economic Planning Sciences, 87:101505, 2023.
 
-24. [24] F. R. Menter, M. Kuntz, R. Langtry, et al. Ten years of industrial experience with the sst turbulence model. Turbulence, heat and mass transfer, 4(1):625632, 2003.
+[24] F. R. Menter, M. Kuntz, R. Langtry, et al. Ten years of industrial experience with the sst turbulence model. Turbulence, heat and mass transfer, 4(1):625632, 2003.
 
-25. [25] P. Mock and S. Díaz. Pathways to decarbonization: the european passenger car market in the years 2021–2035. communications, 49:847129–848102, 2021.
+[25] P. Mock and S. Díaz. Pathways to decarbonization: the european passenger car market in the years 2021–2035. communications, 49:847129–848102, 2021.
 
-26. [26] T. Pfaff, M. Fortunato, A. Sanchez-Gonzalez, and P. W. Battaglia. Learning mesh-based simulation with graph networks. arXiv preprint arXiv:2010.03409, 2020.
+[26] T. Pfaff, M. Fortunato, A. Sanchez-Gonzalez, and P. W. Battaglia. Learning mesh-based simulation with graph networks. arXiv preprint arXiv:2010.03409, 2020.
 
-27. [27] C. R. Qi, H. Su, K. Mo, and L. J. Guibas. Pointnet: Deep learning on point sets for 3d classification and segmentation. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 652–660, 2017.
+[27] C. R. Qi, H. Su, K. Mo, and L. J. Guibas. Pointnet: Deep learning on point sets for 3d classification and segmentation. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 652–660, 2017.
 
-28. [28] E. Remelli, A. Lukoianov, S. Richter, B. Guillard, T. Bagautdinov, P. Baque, and P. Fua. Meshsdf: Differentiable iso-surface extraction. Advances in Neural Information Processing Systems, 33:22468–22478, 2020.
+[28] E. Remelli, A. Lukoianov, S. Richter, B. Guillard, T. Bagautdinov, P. Baque, and P. Fua. Meshsdf: Differentiable iso-surface extraction. Advances in Neural Information Processing Systems, 33:22468–22478, 2020.
 
-29. [29] T. Rios, B. Sendhoff, S. Menzel, T. Back, and B. V. Stein. On the efficiency of a point cloud autoencoder as a geometric representation for shape optimization. pages 791–798. Institute of Electrical and Electronics Engineers Inc., 12 2019.
+[29] T. Rios, B. Sendhoff, S. Menzel, T. Back, and B. V. Stein. On the efficiency of a point cloud autoencoder as a geometric representation for shape optimization. pages 791–798. Institute of Electrical and Electronics Engineers Inc., 12 2019.
 
-30. [30] T. Rios, B. V. Stein, T. Back, B. Sendhoff, and S. Menzel. Point2ffd: Learning shape representations of simulation-ready 3d models for engineering design optimization. pages 1024–1033. Institute of Electrical and Electronics Engineers Inc., 2021.
+[30] T. Rios, B. V. Stein, T. Back, B. Sendhoff, and S. Menzel. Point2ffd: Learning shape representations of simulation-ready 3d models for engineering design optimization. pages 1024–1033. Institute of Electrical and Electronics Engineers Inc., 2021.
 
-31. [31] T. Rios, B. van Stein, P. Wollstadt, T. Bäck, B. Sendhoff, and S. Menzel. Exploiting local geometric features in vehicle design optimization with 3d point cloud autoencoders. In 2021 IEEE Congress on Evolutionary Computation (CEC), pages 514–521, 2021.
+[31] T. Rios, B. van Stein, P. Wollstadt, T. Bäck, B. Sendhoff, and S. Menzel. Exploiting local geometric features in vehicle design optimization with 3d point cloud autoencoders. In 2021 IEEE Congress on Evolutionary Computation (CEC), pages 514–521, 2021.
 
-32. [32] T. Rios, P. Wollstadt, B. V. Stein, T. Back, Z. Xu, B. Sendhoff, and S. Menzel. Scalability of learning tasks on 3d cae models using point cloud autoencoders. pages 1367–1374. Institute of Electrical and Electronics Engineers Inc., 12 2019.
+[32] T. Rios, P. Wollstadt, B. V. Stein, T. Back, Z. Xu, B. Sendhoff, and S. Menzel. Scalability of learning tasks on 3d cae models using point cloud autoencoders. pages 1367–1374. Institute of Electrical and Electronics Engineers Inc., 12 2019.
 
-33. [33] F. Romor, M. Tezzele, M. Mrosek, C. Othmer, and G. Rozza. Multi-fidelity data fusion through parameter space reduction with applications to automotive engineering. International Journal for Numerical Methods in Engineering, 124(23):5293–5311, 2023.
+[33] F. Romor, M. Tezzele, M. Mrosek, C. Othmer, and G. Rozza. Multi-fidelity data fusion through parameter space reduction with applications to automotive engineering. International Journal for Numerical Methods in Engineering, 124(23):5293–5311, 2023.
 
-34. [34] A. Sanchez-Gonzalez, J. Godwin, T. Pfaff, R. Ying, J. Leskovec, and P. Battaglia. Learning to simulate complex physics with graph networks. In International conference on machine learning, pages 8459–8468. PMLR, 2020.
+[34] A. Sanchez-Gonzalez, J. Godwin, T. Pfaff, R. Ying, J. Leskovec, and P. Battaglia. Learning to simulate complex physics with graph networks. In International conference on machine learning, pages 8459–8468. PMLR, 2020.
 
-35. [35] Y. Shen, H. C. Patel, Z. Xu, and J. J. Alonso. Application of multi-fidelity transfer learning with autoencoders for efficient construction of surrogate models. In AIAA SCITECH 2024 Forum, page 0013, 2024.
+[35] Y. Shen, H. C. Patel, Z. Xu, and J. J. Alonso. Application of multi-fidelity transfer learning with autoencoders for efficient construction of surrogate models. In AIAA SCITECH 2024 Forum, page 0013, 2024.
 
-36. [36] B. Song, C. Yuan, F. Permenter, N. Arechiga, and F. Ahmed. Surrogate modeling of car drag coefficient with depth and normal renderings. arXiv preprint arXiv:2306.06110, 2023.
+[36] B. Song, C. Yuan, F. Permenter, N. Arechiga, and F. Ahmed. Surrogate modeling of car drag coefficient with depth and normal renderings. arXiv preprint arXiv:2306.06110, 2023.
 
-37. [37] D. B. Spalding. The numerical computation of turbulent flow. Comp. Methods Appl. Mech. Eng., 3:269, 1974.
+[37] D. B. Spalding. The numerical computation of turbulent flow. Comp. Methods Appl. Mech. Eng., 3:269, 1974.
 
-38. [38] N. Thuerey, K. Weißenow, L. Prantl, and X. Hu. Deep learning methods for reynolds-averaged navier–stokes simulations of airfoil flows. AIAA Journal, 58(1):25–36, 2020.
+[38] N. Thuerey, K. Weißenow, L. Prantl, and X. Hu. Deep learning methods for reynolds-averaged navier–stokes simulations of airfoil flows. AIAA Journal, 58(1):25–36, 2020.
 
-39. [39] T. L. Trinh, F. Chen, T. Nanri, and K. Akasaka. 3d super-resolution model for vehicle flow field enrichment. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision, pages 5826–5835, 2024.
+[39] T. L. Trinh, F. Chen, T. Nanri, and K. Akasaka. 3d super-resolution model for vehicle flow field enrichment. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision, pages 5826–5835, 2024.
 
-40. [40] N. Umetani and B. Bickel. Learning three-dimensional flow for interactive aerodynamic design. ACM Transactions on Graphics, 37, 2018.
+[40] N. Umetani and B. Bickel. Learning three-dimensional flow for interactive aerodynamic design. ACM Transactions on Graphics, 37, 2018.
 
-41. [41] M. Usama, A. Arif, F. Haris, S. Khan, S. K. Afaq, and S. Rashid. A data-driven interactive system for aerodynamic and user-centred generative vehicle design. In 2021 International Conference on Artificial Intelligence (ICAI), pages 119–127, 2021.
+[41] M. Usama, A. Arif, F. Haris, S. Khan, S. K. Afaq, and S. Rashid. A data-driven interactive system for aerodynamic and user-centred generative vehicle design. In 2021 International Conference on Artificial Intelligence (ICAI), pages 119–127, 2021.
 
-42. [42] Y. Wang, Y. Sun, Z. Liu, S. E. Sarma, M. M. Bronstein, and J. M. Solomon. Dynamic graph cnn for learning on point clouds. ACM Transactions on Graphics (tog), 38(5):1–12, 2019.
+[42] Y. Wang, Y. Sun, Z. Liu, S. E. Sarma, M. M. Bronstein, and J. M. Solomon. Dynamic graph cnn for learning on point clouds. ACM Transactions on Graphics (tog), 38(5):1–12, 2019.
 
-43. [43] D. Wieser, H.-J. Schmidt, S. Mueller, C. Strangfeld, C. Nayeri, and C. Paschereit. Experimental comparison of the aerodynamic behavior of fastback and notchback drivaer models. SAE International Journal of Passenger Cars-Mechanical Systems, 7(2014-01-0613):682–691, 2014.
+[43] D. Wieser, H.-J. Schmidt, S. Mueller, C. Strangfeld, C. Nayeri, and C. Paschereit. Experimental comparison of the aerodynamic behavior of fastback and notchback drivaer models. SAE International Journal of Passenger Cars-Mechanical Systems, 7(2014-01-0613):682–691, 2014.
