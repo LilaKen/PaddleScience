@@ -32,4 +32,5 @@
         - MOlFLOWDataset
         - CGCNNDataset
         - PEMSDataset
+        - DrivAerNetDataset
       show_root_heading: true
