@@ -13,21 +13,15 @@
 # limitations under the License.
 
 import warnings
-from os import path as osp
 
 import hydra
-from omegaconf import DictConfig
 import paddle
+from omegaconf import DictConfig
+
 import ppsci
-from ppsci.utils import logger
 
 
 def train(cfg: DictConfig):
-    # set seed
-    ppsci.utils.misc.set_random_seed(cfg.seed)
-
-    # initialize logger
-    logger.init_logger("ppsci", osp.join(cfg.output_dir, "train.log"), "info")
 
     # set model
     model = ppsci.arch.RegDGCNN(
@@ -52,11 +46,6 @@ def train(cfg: DictConfig):
             "mode": cfg.mode,
         },
         "batch_size": cfg.TRAIN.batch_size,
-        "sampler": {
-            "name": "BatchSampler",
-            "drop_last": False,
-            "shuffle": True,
-        },
         "num_workers": cfg.TRAIN.num_workers,
     }
 
@@ -81,11 +70,6 @@ def train(cfg: DictConfig):
             "num_points": cfg.TRAIN.num_points,
         },
         "batch_size": cfg.TRAIN.batch_size,
-        "sampler": {
-            "name": "BatchSampler",
-            "drop_last": False,
-            "shuffle": True,
-        },
         "num_workers": cfg.TRAIN.num_workers,
     }
 
@@ -101,8 +85,13 @@ def train(cfg: DictConfig):
     # set optimizer
     lr_scheduler = ppsci.optimizer.lr_scheduler.ReduceOnPlateau(
         epochs=cfg.TRAIN.epochs,
-        iters_per_epoch=(cfg.TRAIN.iters_per_epoch//(paddle.distributed.get_world_size() * cfg.TRAIN.batch_size) + 1),
-        learning_rate=cfg.ARGS.lr,
+        iters_per_epoch=(
+            cfg.TRAIN.iters_per_epoch
+            * cfg.TRAIN.train_fractions
+            // (paddle.distributed.get_world_size() * cfg.TRAIN.batch_size)
+            + 1
+        ),
+        learning_rate=cfg.optimizer.lr,
         mode=cfg.TRAIN.scheduler.mode,
         patience=cfg.TRAIN.scheduler.patience,
         factor=cfg.TRAIN.scheduler.factor,
@@ -110,9 +99,11 @@ def train(cfg: DictConfig):
     )()
 
     optimizer = (
-        ppsci.optimizer.Adam(lr_scheduler, weight_decay=cfg.ARGS.weight_decay)(model)
-        if cfg.ARGS.optimizer == "adam"
-        else ppsci.optimizer.SGD(lr_scheduler, weight_decay=cfg.ARGS.weight_decay)(
+        ppsci.optimizer.Adam(lr_scheduler, weight_decay=cfg.optimizer.weight_decay)(
+            model
+        )
+        if cfg.optimizer.optimizer == "adam"
+        else ppsci.optimizer.SGD(lr_scheduler, weight_decay=cfg.optimizer.weight_decay)(
             model
         )
     )
@@ -120,7 +111,12 @@ def train(cfg: DictConfig):
     # initialize solver
     solver = ppsci.solver.Solver(
         model=model,
-        iters_per_epoch=(cfg.TRAIN.iters_per_epoch//(paddle.distributed.get_world_size() * cfg.TRAIN.batch_size) + 1),
+        iters_per_epoch=(
+            cfg.TRAIN.iters_per_epoch
+            * cfg.TRAIN.train_fractions
+            // (paddle.distributed.get_world_size() * cfg.TRAIN.batch_size)
+            + 1
+        ),
         constraint=constraint,
         output_dir=cfg.output_dir,
         optimizer=optimizer,
@@ -138,11 +134,6 @@ def train(cfg: DictConfig):
 
 
 def evaluate(cfg: DictConfig):
-    # set seed
-    ppsci.utils.misc.set_random_seed(cfg.seed)
-
-    # initialize logger
-    logger.init_logger("ppsci", osp.join(cfg.output_dir, "eval.log"), "info")
 
     # set model
     model = ppsci.arch.RegDGCNN(
@@ -166,11 +157,6 @@ def evaluate(cfg: DictConfig):
             "mode": cfg.mode,
         },
         "batch_size": cfg.EVAL.batch_size,
-        "sampler": {
-            "name": "BatchSampler",
-            "drop_last": False,
-            "shuffle": False,
-        },
         "num_workers": cfg.EVAL.num_workers,
     }
 
