@@ -8,7 +8,7 @@
 ## 代码信息
 |预训练模型 |神经网络|指标|
 |:-------:|:-------:|:-:|
-|[CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams)|RegDGCNN|    $R^2$:87.5% |
+|[CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams)|RegDGCNN|    $R^2:87.5%$ |
 
 === "模型训练命令"
 
