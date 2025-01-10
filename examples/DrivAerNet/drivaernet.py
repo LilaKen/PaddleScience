@@ -185,7 +185,7 @@ def evaluate(cfg: DictConfig):
     solver.eval()
 
 
-@hydra.main(version_base=None, config_path="./conf", config_name="DriveAerNet.yaml")
+@hydra.main(version_base=None, config_path="./conf", config_name="drivaernet.yaml")
 def main(cfg: DictConfig):
     warnings.filterwarnings("ignore")
     if cfg.mode == "train":
