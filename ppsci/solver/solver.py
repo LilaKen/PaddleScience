@@ -166,7 +166,7 @@ class Solver:
             # (Recommended)Params can be passed within cfg
             # rather than passed to 'Solver.__init__' one-by-one.
             self._parse_params_from_cfg(cfg)
-
+        self.cur_metric = 0
         # set model
         self.model = model
         # set constraint
