@@ -6,9 +6,9 @@
 |2024|Design Automation Conference|Mohamed Elrefaie, Angela Dai, Faez Ahmed|3|DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Graph-Based Drag Prediction|
 
 ## 代码信息
-|问题类型 |神经网络|指标(相对误差)|
+|问题类型 |神经网络|$R^2$|
 |:-------:|:-------:|:-:|
-|点云预测空气阻力系数|RegDGCNN|     7.48%      |
+|点云预测空气阻力系数|RegDGCNN|     87.5%      |
 
 === "模型训练命令"
 
@@ -52,13 +52,22 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 
 ## 2. 问题定义
 
-![fig1](.\drivaernet\fig1.jpg)
+数据下载：
+~~~bash
+``` sh
+wget https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer%2B%2B/data.tar 
+tar -xvf data.tar
+```
+~~~
+
+
+![fig1](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig1.jpg)
 
 图1：参数化的DrivAer模型使用变形盒子在ANSA 软件中进行几何变换，总共使用了50个几何参数和32个可变形实体。对变形框进行颜色编码，突出易受参数修改影响的区域，便于创建" DrivAerNet "数据集。利用这种变形技术，本研究生成了4000个独特的汽车设计。
 
 **DrivAer模型Net数据集和模型背景介绍：**DrivAer模型是由慕尼黑工业大学( TUM )的研究人员开发的一种行之有效的传统汽车参考模型。它是宝马3系和奥迪A4汽车设计的结合，以代表大多数传统汽车。DrivAer模型是为了弥补Ahmed和SAE等机构的开源过度简化模型与制造公司的复杂设计之间的差距而开发的，而这些模型并不公开。为了准确地评估真实世界的气动设计，本研究选择了具有详细的下车体、车轮和反射镜( FDwWwM )的快背构型作为本研究的基准模型，如图2a所示。FDwWwM模型的这种选择是由车轮、反射镜和车身底部几何形状对气动阻力的巨大影响所驱动的，这一结论得到了文献[ 17 ]的研究结果的支持。具体来说，详细的底部几何结构增加了32 ~ 34个计数，镜面的加入增加了14 ~ 16个计数，车轮的存在使总阻力系数增加了102个计数。
 
-![fig2](.\drivaernet\fig2.jpg)
+![fig2](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig2.jpg)
 
 图2：DrivAer模型Fastback模型，包含详细的特征，并附有计算网格，说明了网格细化区域和附加层，以准确模拟空气动力学现象。
 
@@ -66,11 +75,11 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 
 **生成多样化汽车设计的技术：**参数化模型，以及在实验设计( Design of Experiment，DoE )过程中应用的约束和边界，极大地丰富了数据集，使其成为开发和训练用于代理建模和设计优化任务的高级深度学习模型的坚实基础。本研究提供了包含变形特征的参数化模型的访问，以便进一步参考和利用。与[ 19 ]中的方法不同，本研究实现了更广泛的变形技术，使本研究能够探索更多样化的汽车设计。该方法旨在增强深度学习模型的适应性，使其能够泛化到各种汽车设计中，而不是局限于单个设计中的微小几何修改。图3描述了网格质量的变化，从粗到高分辨率的不同数据集。与[ 22 ]和[ 36 ]的研究相比，本研究的原始网格具有540k的网格面，提供了更稠密和更详细的表示，从而揭示了更详细的几何和设计特征。此外，图4给出了来自DrivAerNet数据集的汽车外形图谱，说明了设计尺寸和特征的可变性。这个范围从最大到最小的体积模型强调了数据集覆盖全面的空气动力学剖面的能力。
 
-![fig3](.\drivaernet\fig3.jpg)
+![fig3](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig3.jpg)
 
 图3：不同数据集的网格分辨率比较；第一行特征是Li et al ( 2023 ) [ 22 ]的Ahmed体网格，显示了粗略的分辨率。第二行显示来自ShapeNet数据集的中等分辨率网格，正如Song等人( 2023 ) [ 36 ]所使用的。最后一行展示了我们的高分辨率网格，为深入的气动设计提供了更多的细节。
 
-![fig4](.\drivaernet\fig4.jpg)
+![fig4](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig4.jpg)
 
 图4：来自DrivAerNet数据集的汽车模型，说明了一系列的空气动力学设计。最左边的模型代表了数据集中的最大体积，而最右边的模型代表了体积最小的设计，突出了所研究的气动外形的多样性和范围。
 
@@ -89,8 +98,9 @@ python DrivAerNet.py mode=eval EVAL.pretrained_model_path=“训练的时候保�
 DrivAer模型快退模型的选择是由计算和实验参考的可用性来证明的，这使得本研究能够将本研究的结果与既定的数据[ 17、43 ]进行比较。在开始模拟之前，本研究对网格细化对结果的影响进行了初步评估。这涉及将三种不同网格分辨率下得到的阻力系数与实验值和参考模拟进行比较，详见表2。目的是在模拟精度和计算效率之间找到一个最佳的平衡。这种平衡是至关重要的，因为本研究的目标是生成一个用于训练深度学习模型的大规模数据集，这需要仿真结果的高保真度和可管理的磁盘存储和仿真时间，以适应广泛的计算需求。阻力系数$C_d$由方程确定：
 
 $$
-C_d=\frac{F_d}{\frac{1}{2}\rho u_\infty^2A_{\mathrm{ref}}}
+C_d = \frac{F_d}{\frac{1}{2} \rho u_\infty^2 A_{\mathrm{ref}}}
 $$
+
 物体所受的阻力$F_d$是其有效迎风面积$A_{ref}$、来流速度$u_\infty$和空气密度$\rho$的函数。该力由压力和摩擦力两部分组成。
 
 评估不仅包括阻力系数，还包括网格尺寸和所需的计算资源。仿真在装有AMD EPYC 7763 64 - Core处理器的机器上进行，共256个CPU核，4个Nvidia A100 80GB GPU。
@@ -104,18 +114,21 @@ $$
 **包括多样化的汽车外形尺寸和复杂的流动动力学：**与[ 36 ]的方法不同，所有的汽车模型都标准化为3.5米的统一长度，以适应预定义的计算域，本研究的数据集允许汽车尺寸的多样性，调整网格，边界框和每个设计的附加层。这种灵活性对于捕捉汽车周围复杂的流动动力学，包括流动分离、再附和回流区等现象，以及确保精确的气动力系数估计至关重要。这种方法解决了一些研究中观察到的数据集大小优先于模拟保真度的局限性，往往忽略了收敛、精确建模和适当的边界条件对于复杂三维模型的重要性。
 
 **车轮、侧反射镜和底盘的建模：**正如之前所强调的，大多数文献和可用的数据集往往忽略了车轮、侧镜和下半身的建模，如表1所示。相比之下，本研究的方法包括对这些组件的详细建模。图5说明了汽车上的速度分布：在这里，由于无滑移边界条件，车身显示零速度，而车轮显示非零速度。此外，该图可视化了汽车周围的流线，为包括这些特征的影响的流动动力学提供了见解。DrivAerNet数据集具有完整的三维流场信息，如图6a中的速度数据所示，此外，它还提供了汽车表面的压力分布。压力系数$C_p$由压差$p - p_\infty$与动压的比值$\frac{1}{2}\rho u^2$计算，具体表达式为：
+
+
 $$
 C_p=\frac{p-p_\infty}{\frac{1}{2}\rho u^2}
 $$
+
 $C_p$在汽车表面的分布如图6b所示。
 
-![table1](.\drivaernet\table1.jpg)
+![table1](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/table1.jpg)
 
 表1：对各种空气动力学数据集进行了比较分析，重点介绍了数据集中的设计数量(大小)、气动力系数(阻力系数$C_d$和升力系数$C_l$)的包含、速度( $u$ )和压力( $p$ )场的包含、车轮/车体建模的存在、进行参数研究的能力、设计参数的数量和开源可用性等关键方面。
 
 #### 2.2 几何可行性
 
-![fig6](.\drivaernet\fig6.jpg)
+![fig6](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig6.jpg)
 
 图6：DrivAerNet数据集包括详细的速度、压力和壁面剪切应力的三维场，以及气动力系数，以及每个入口的车身和前后轮的详细三维网格。
 
@@ -143,19 +156,19 @@ DrivAerNet数据集提供了一套全面的与汽车几何结构相关的空气�
 
 **Drivaernet中汽车设计之间的气动性能变异性：**图7展示了DrivAerNet数据集中阻力系数($C_d$ )和各种升力系数( $C_l、C_{l,r}、C_{l,f}$)之间关系的三个散点图。数据被划分为训练集、验证集和测试集，其中70 %用于训练，15 %用于验证和测试。这样的划分对于模型训练过程的完整性和后续的性能评估至关重要。
 
-![fig7](.\drivaernet\fig7.jpg)
+![fig7](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig7.jpg)
 
 图7：散点图显示了DrivAerNet数据集的阻力系数( $C_d$)和升力系数($C_l、C_{l,r}、C_{l,f}$)之间的关系。该数据集代表了利用增强型随机进化算法( Enhanced Stochastic Evolution Algorithm，ESE )通过最优拉丁超立方抽样方法生成的独特设计变体。数据点分为训练集、验证集和测试集( 70 %、15 %、15 %)。
 
 图8所示的核密度估计( KDE )图比较了两个气动数据集的阻力系数分布。在这里，本研究比较了文献[ 36 ]中的数据集，该数据集跨越了广泛的阻力值，反映了ShapeNet中各种各样的汽车设计。相比之下，本研究的DrivAerNet数据集针对传统的汽车设计，考虑了更详细的几何修改。这一关注点在工程设计过程中尤其相关，因为在工程设计过程中，最初的汽车设计通常是通过增量变化来优化气动性能。因此，DrivAerNet数据集提供了更具体的检查细微的设计调整及其对气动性能的影响。
 
-![fig8](.\drivaernet\fig8.jpg)
+![fig8](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig8.jpg)
 
 图8：两个气动数据集阻力系数的比较核密度估计( KDE )和小提琴图。蓝色曲线代表来自Song等人2023 [ 36 ]的数据集，橙色曲线对应DrivAerNet数据集。DrivAerNet专注于传统的汽车设计，强调微小的几何修改对气动效率的影响。
 
 在图9中，本研究给出了不同设计下的气动性能。左上方说明了阻力系数$C_d$最低的设计。相反，右上角显示了$C_d$最高的设计，识别了气动优化的机会。左下方的设计升力系数$C_l$ (表示最大下压力)最低，有利于高速时的稳定性，而右下方的设计升力系数$C_l$最高，可能使气动稳定性复杂化。
 
-![fig9](.\drivaernet\fig9.jpg)
+![fig9](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig9.jpg)
 
 图9：来自DrivAerNet的汽车设计的气动性能显示了一系列系数。左上：阻力系数$C_d$最小的设计，表明气动效率最优。右上角：$C_d$最大的设计。左下：设计最小升力系数$C_l$  (最大下压力)。右下方：采用最大$C_l$ 设计。
 
@@ -165,7 +178,7 @@ DrivAerNet数据集提供了一套全面的与汽车几何结构相关的空气�
 
 正如[ 1、20、26、29、30、32、34]的研究表明，几何深度学习在解决涉及不规则几何体的流体动力学挑战方面具有重要的前景。
 
-![fig10](.\drivaernet\fig10.jpg)
+![fig10](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig10.jpg)
 
 图10：用于气动阻力预测的RegDGCNN的结构。模型通过将三维网格转换为点云表示的方式进行处理。它取n个输入点，在一个EdgeConv层为每个点计算一个大小为k的边缘特征集，并对每个集合内的特征进行聚合，计算对应点的EdgeConv响应。最后一个EdgeConv层的输出特征进行全局聚合，形成1D全局描述符，然后用于预测气动阻力系数$C_d$，从而可以直接从物体的3D几何结构中学习。Edge Conv块接受一个维度为$n × f$的输入张量，利用多层感知器( MLP )确定每个点的边缘特征。在MLP应用后，通过对相邻的边缘特征进行池化操作，块输出一个维度为$n × a_n$的张量。
 
@@ -176,6 +189,8 @@ DrivAerNet数据集提供了一套全面的与汽车几何结构相关的空气�
 $$
 h_{ij}=\Theta\left(x_i,x_j-x_i\right)
 $$
+
+
 通过使用共享的多层感知器( Multi-Layer感知器，MLP )来聚合来自这些邻居的信息来增强节点特征，该方法同时处理了单个节点特征及其与相邻节点的差异，有效地捕获了局部几何上下文。
 
 通过Edge Conv变换，进行全局特征聚合，将所有节点的特征聚合成一个奇异的全局特征向量：
@@ -183,6 +198,7 @@ $$
 $$
 x_i^{\prime}=\max_{j\in\mathcal{N}(i)}h_{ij}
 $$
+
 在这里，最大池化被用来封装图的整体信息。该全局特征向量随后通过几个FC层进行处理，其中包括ReLU和dropout等非线性激活函数，以分别引入非线性和防止过拟合。该架构最终形成了一个输出层，旨在适应手头的具体任务，例如对回归任务使用线性激活。
 
 $$
@@ -214,7 +230,7 @@ $$
 
 对RegDGCNN在DrivAerNet数据集上的性能进行测试，如图11所示，其预测值与CFD真实数据之间具有较好的相关性，说明了模型的有效性。DrivAerNet数据集的复杂性归因于其包含了行业标准形状，通过50个几何参数变化，在空气动力学预测方面提出了全面的挑战。本研究的模型有效地导航了数据集的复杂性，并直接处理了3D网格数据，这标志着传统方法的重大转变，通常依赖于生成符号距离场( SDF )或渲染2D图像。这种直接的方法使本研究在看不见的测试集上达到了0.9的R2分数，强调了模型准确识别细微气动差异的能力。
 
-![fig11](.\drivaernet\fig11.jpg)
+![fig11](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig11.jpg)
 
 图11：本研究的RegDGCNN模型预测的阻力系数$C_d$与DrivAerNet未见测试集的真实值的相关性图，取得了0.9的R2分数。点线表示完全相关的直线，代表理想的预测场景。
 
@@ -222,13 +238,13 @@ $$
 
 为了测试所提出的RegDGCNN模型的可推广性，本研究还在现有的基准数据集上评估了其适应复杂几何形状的能力，使用了来自ShapeNet数据集[ 36 ] (见图12)的2，479种不同的汽车设计，该数据集显示出比本研究的DrivAerNet数据集更广泛的汽车形状。
 
-![fig12](.\drivaernet\fig12.jpg)
+![fig12](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig12.jpg)
 
 图12：从ShapeNet数据集中选取汽车样本，展示了汽车形状和网格分辨率的多样性，用于评估RegDGCNN的泛化能力。这些样本与本研究在DrivAerNet数据集中发现的高分辨率网格提供了一个比较基准。
 
 在表3中，本研究比较了两个模型的性能：attn - ResNeXt模型来自文献[ 36 ]的研究，该模型实现了自注意力机制，以促进对图像各个区域之间相互作用的理解。它使用2D深度/正常渲染作为输入，具有大约20亿个参数，实现了0.84的$R^2$分数；本研究提出的RegDGCNN模型，直接处理三维网格数据，显著减少了参数数量至300万，并取得了优异的R2评分0.87。这种比较强调了本研究的模型在气动阻力预测任务中的效率和有效性。
 
-![table3](.\drivaernet\table3.jpg)
+![table3](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/table3.jpg)
 
 ##### 3.2.3 训练数据集大小的影响
 
@@ -236,7 +252,7 @@ $$
 
 图13显示了一个明显的趋势，拖曳系数预测的平均相对误差随着用于训练的数据集百分比的增加而减少。这种趋势对于两个数据集都是一致的，强调了共同的机器学习原理，即更多的训练数据通常会导致更好的模型性能。DrivAerNet Dataset在所有大小的训练数据上的性能提升凸显了更大数据集在空气动力学机器学习模型中的关键作用，并进一步确立了DrivAerNet数据集的价值，其价值显著大于以往的开源数据集。
 
-![fig13](.\drivaernet\fig13.jpg)
+![fig13](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig13.jpg)
 
 图13：基于训练集大小，本研究的模型RegDGCNN在未知测试集上阻力系数预测的平均相对误差。ShapeNet拖拽数据集[ 36 ]的结果用蓝色表示，而DrivAerNet数据集的结果用橙色表示。训练集大小从20 %到100 %不等。本研究观察到数据集规模的增加会导致显著的误差降低，表明了在气动代理模型建模中使用更大数据集的必要性。
 
@@ -256,7 +272,7 @@ $$
 
 为了进一步评估模型的性能，本研究分析了边缘卷积操作后中间层学习到的特征。图14说明了从DrivAerNet获取的汽车样本的上采样点云的特征重要性分布，颜色编码从浅黄色(低重要性)到深红色(高重要性)。最初，RegDGCNN对汽车的前部和后部区域进行调零，这对塑造气动性能至关重要。这一关注点对于气动设计具有显著的针对性，因为前部区域对压差阻力有重要影响，后部区域由于在气流分离和尾流区形成中的作用而显得尤为重要。随着模型向更深的层次发展，它开始识别更复杂的几何细节。相反，屋顶和窗户等区域对阻力的影响较小，突出了模型在识别具有更显著气动影响的区域方面的能力。
 
-![fig14](.\drivaernet\fig14.jpg)
+![fig14](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig14.jpg)
 
 图14：从RegDGCNN导出的DrivAerNet的汽车模型的上采样点云的特征重要性的可视化，特别关注来自EdgeConv层的特征。特征强度由低(浅黄色)到高(深红色)的颜色编码，表明了卷积层显著学习焦点的区域。这种映射突出了学习到的有助于模型预测的特征。
 
@@ -266,425 +282,20 @@ $$
 
 用于对点云进行随机变换，包括平移、加噪声和随机丢点，以提升模型的泛化能力。
 
-```py
-class DataAugmentation:
-    """
-    Class encapsulating various data augmentation techniques for point clouds.
-    """
-
-    @staticmethod
-    def translate_pointcloud(
-        pointcloud: paddle.Tensor,
-        translation_range: Tuple[float, float] = (2.0 / 3.0, 3.0 / 2.0),
-    ) -> paddle.Tensor:
-        """
-        Translates the pointcloud by a random factor within a given range.
-
-        Args:
-            pointcloud: The input point cloud as a paddle.Tensor.
-            translation_range: A tuple specifying the range for translation factors.
-
-        Returns:
-            Translated point cloud as a paddle.Tensor.
-        """
-        xyz1 = np.random.uniform(
-            low=translation_range[0], high=translation_range[1], size=[3]
-        )  # 随机生成轴缩放因子
-        xyz2 = np.random.uniform(low=-0.2, high=0.2, size=[3])  # 随机生成平移偏移
-        translated_pointcloud = np.add(np.multiply(pointcloud, xyz1), xyz2).astype(
-            "float32"
-        )
-        return paddle.to_tensor(data=translated_pointcloud, dtype="float32")
-
-    @staticmethod
-    def jitter_pointcloud(
-        pointcloud: paddle.Tensor, sigma: float = 0.01, clip: float = 0.02
-    ) -> paddle.Tensor:
-        """
-        Adds Gaussian noise to the pointcloud.
-
-        Args:
-            pointcloud: The input point cloud as a paddle.Tensor.
-            sigma: Standard deviation of the Gaussian noise.
-            clip: Maximum absolute value for noise.
-
-        Returns:
-            Jittered point cloud as a paddle.Tensor.
-        """
-        N, C = tuple(pointcloud.shape)
-        jittered_pointcloud = pointcloud + paddle.clip(
-            x=sigma * paddle.randn(shape=[N, C]), min=-clip, max=clip
-        )  # 加入高斯噪声并限制范围
-        return jittered_pointcloud
-
-    @staticmethod
-    def drop_points(pointcloud: paddle.Tensor, drop_rate: float = 0.1) -> paddle.Tensor:
-        """
-        Randomly removes points from the point cloud based on the drop rate.
-
-        Args:
-            pointcloud: The input point cloud as a paddle.Tensor.
-            drop_rate: The percentage of points to be randomly dropped.
-
-        Returns:
-            The point cloud with points dropped as a paddle.Tensor.
-        """
-        num_drop = int(drop_rate * pointcloud.shape[0])  # 计算需要丢弃的点数
-        drop_indices = np.random.choice(pointcloud.shape[0], num_drop, replace=False)
-        keep_indices = np.setdiff1d(np.arange(pointcloud.shape[0]), drop_indices)
-        dropped_pointcloud = pointcloud[keep_indices, :]  # 保留剩余点
-        return dropped_pointcloud
+``` py linenums="46"
+--8<--
+ppsci/arch/regdgcnn.py:46:112
+--8<--
 ```
 
 **2.数据集类：`DrivAerNetDataset`：**
 
 用于加载 DrivAerNet 数据集，并处理点云数据（如采样、增强和归一化）。
 
-```py
-class DrivAerNetDataset(paddle.io.Dataset):
-    """
-    Paddle Dataset class for the DrivAerNet dataset, handling loading, transforming, and augmenting 3D car models.
-
-    This dataset is specifically designed for aerodynamic tasks, including training machine learning models
-    to predict aerodynamic coefficients such as drag coefficient (Cd) from 3D car models.
-
-    Examples:
-        >>> import ppsci
-        >>> dataset = ppsci.data.dataset.DrivAerNetDataset(
-        ...     input_keys=("vertices",),
-        ...     label_keys=("cd_value",),
-        ...     weight_keys=("weight_keys",),
-        ...     subset_dir="/path/to/subset_dir",
-        ...     ids_file="train_ids.txt",
-        ...     root_dir="/path/to/DrivAerNetDataset",
-        ...     csv_file="/path/to/aero_metadata.csv",
-        ...     num_points=1024,
-        ...     transform=None,
-        ... )  # doctest: +SKIP
-    """
-    def __init__(
-        self,
-        input_keys: Tuple[str, ...],
-        label_keys: Tuple[str, ...],
-        weight_keys: Tuple[str, ...],
-        subset_dir: str,
-        ids_file: str,
-        root_dir: str,
-        csv_file: str,
-        num_points: int,
-        transform: Optional[Callable] = None,
-        pointcloud_exist: bool = True,
-    ):
-        """
-        Initializes the DrivAerNetDataset instance.
-
-        Args:
-            input_keys (Tuple[str, ...]): Tuple specifying the keys for input features.
-                These keys correspond to the attributes of the dataset used as input to the model.
-                For example, "vertices" represents the 3D point cloud vertices of car models.
-
-            label_keys (Tuple[str, ...]): Tuple specifying the keys for ground-truth labels.
-                These keys correspond to the target values, such as aerodynamic coefficients like Cd.
-                Example: ("cd_value",)
-
-            weight_keys (Tuple[str, ...]): Tuple specifying the keys for optional sample weights.
-                These keys represent weighting factors that may be used to adjust loss computation
-                during model training. Useful for handling sample imbalance.
-                Example: ("weight_keys",)
-
-            subset_dir (str): Path to the directory containing subset information.
-                This directory typically contains files that divide the dataset into training,
-                validation, and test subsets using a list of model IDs.
-
-            ids_file (str): Path to the text file containing model IDs for the current subset.
-                Each line in the file corresponds to a unique model ID that defines which
-                models belong to the subset (e.g., training set or test set).
-
-            root_dir (str): Directory containing the STL files of 3D car models.
-                Each STL file is expected to represent a single car model and is named according
-                to the corresponding model ID. This is the primary data source.
-
-            csv_file (str): Path to the CSV file containing metadata for car models.
-                This file typically includes aerodynamic properties (e.g., drag coefficient)
-                and other descriptive attributes mapped to each model ID.
-
-            num_points (int): Fixed number of points to sample from each 3D model.
-                If a 3D model has more points than `num_points`, it will be randomly subsampled.
-                If it has fewer points, it will be zero-padded to reach the desired number.
-
-            transform (Optional[Callable]): An optional callable for applying data transformations.
-                This can include augmentations such as scaling, rotation, jittering, or other preprocessing
-                steps applied to the 3D point clouds before they are passed to the model.
-        """
-
-        super().__init__()
-        self.root_dir = root_dir
-        try:
-            self.data_frame = pd.read_csv(csv_file)
-        except Exception as e:
-            logging.error(f"Failed to load CSV file: {csv_file}. Error: {e}")
-            raise
-        self.input_keys = input_keys
-        self.label_keys = label_keys
-        self.weight_keys = weight_keys
-        self.subset_dir = subset_dir
-        self.ids_file = ids_file
-        self.transform = transform
-        self.num_points = num_points
-        self.pointcloud_exist = pointcloud_exist
-        self.augmentation = DataAugmentation()
-
-        try:
-            with open(os.path.join(self.subset_dir, self.ids_file), "r") as file:
-                subset_ids = file.read().split()
-            self.subset_indices = self.data_frame[self.data_frame['Design'].isin(subset_ids)].index.tolist()
-            self.data_frame = self.data_frame.loc[self.subset_indices].reset_index(drop=True)
-        except FileNotFoundError as e:
-            raise FileNotFoundError(f"Error loading subset file {self.ids_file}: {e}")
-
-    def __len__(self) -> int:
-        """Returns the total number of samples in the dataset."""
-        return len(self.data_frame)
-
-    def min_max_normalize(self, data: paddle.Tensor) -> paddle.Tensor:
-        """
-        Normalizes the data to the range [0, 1] based on min and max values.
-
-        Args:
-            data: Input data as a paddle.Tensor.
-
-        Returns:
-            Normalized data as a paddle.Tensor.
-        """
-        min_vals, _ = data.min(axis=0, keepdim=True)
-        max_vals, _ = data.max(axis=0, keepdim=True)
-        normalized_data = (data - min_vals) / (max_vals - min_vals)
-        return normalized_data
-
-    def _sample_or_pad_vertices(
-        self, vertices: paddle.Tensor, num_points: int
-    ) -> paddle.Tensor:
-        """
-        Subsamples or pads the vertices of the model to a fixed number of points.
-
-        Args:
-            vertices: The vertices of the 3D model as a paddle.Tensor.
-            num_points: The desired number of points for the model.
-
-        Returns:
-            The vertices standardized to the specified number of points.
-        """
-        num_vertices = vertices.shape[0]
-        if num_vertices > num_points:
-            indices = np.random.choice(num_vertices, num_points, replace=False)
-            vertices = vertices[indices]
-        elif num_vertices < num_points:
-            padding = paddle.zeros(
-                shape=(num_points - num_vertices, 3), dtype="float32"
-            )
-            vertices = paddle.concat(x=(vertices, padding), axis=0)
-        return vertices
-
-    def _load_point_cloud(self, design_id: str) -> Optional[paddle.Tensor]:
-        load_path = os.path.join(self.root_dir, f'{design_id}.pdparams')
-        if os.path.exists(load_path) and os.path.getsize(load_path) > 0:
-            try:
-                vertices = paddle.load(path=str(load_path))
-
-                num_vertices = vertices.shape[0]
-
-                if num_vertices > self.num_points:
-                    indices = np.random.choice(num_vertices, self.num_points, replace=False)
-                    vertices = vertices.numpy()[indices]
-                    vertices = paddle.to_tensor(vertices)
-
-                return vertices
-            except (EOFError, RuntimeError, ValueError) as e:
-                print(f"Error loading point cloud from {load_path}: {e}")
-                return e
-
-    def __getitem__(
-            self, idx: int, apply_augmentations: bool = True
-    ) -> tuple[
-        dict[str, paddle.Tensor], dict[str, paddle.Tensor], dict[str, paddle.Tensor]
-    ]:
-        """
-        Retrieves a sample and its corresponding label from the dataset, with an option to apply augmentations.
-
-        Args:
-            idx (int): Index of the sample to retrieve.
-            apply_augmentations (bool, optional): Whether to apply data augmentations. Defaults to True.
-
-        Returns:
-            Tuple[paddle.Tensor, paddle.Tensor]: The sample (point cloud) and its label (Cd value).
-        """
-        if paddle.is_tensor(x=idx):
-            idx = idx.tolist()
-
-        while True:
-            row = self.data_frame.iloc[idx]
-            design_id = row["Design"]
-            cd_value = row["Average Cd"]
-
-            if self.pointcloud_exist:
-                vertices = self._load_point_cloud(design_id)
-                if vertices is None:
-                    # logging.warning(f"Skipping design {design_id} because point cloud is not found or corrupted.")
-                    idx = (idx + 1) % len(self.data_frame)
-                    continue
-            else:
-                geometry_path = os.path.join(self.root_dir, f"{design_id}.stl")
-                try:
-                    mesh = trimesh.load(geometry_path, force="mesh")
-                except Exception as e:
-                    logging.error(f"Failed to load STL file: {geometry_path}. Error: {e}")
-                    raise
-                vertices = paddle.to_tensor(data=mesh.vertices, dtype="float32")
-                vertices = self._sample_or_pad_vertices(vertices, self.num_points)
-            if apply_augmentations:
-                vertices = self.augmentation.translate_pointcloud(vertices.numpy())
-                vertices = self.augmentation.jitter_pointcloud(vertices)
-            if self.transform:
-                vertices = self.transform(vertices)
-            cd_value = paddle.to_tensor(data=float(cd_value), dtype="float32").reshape([-1])
-
-            return (
-                {self.input_keys[0]: vertices},
-                {self.label_keys[0]: cd_value},
-                {self.weight_keys[0]: paddle.to_tensor(1)},
-            )
-
-        # return vertices, cd_value
-
-    def visualize_mesh(self, idx):
-        """
-        Visualize the STL mesh for a specific design from the dataset.
-
-        Args:
-            idx (int): Index of the design to visualize in the dataset.
-
-        This function loads the mesh from the STL file corresponding to the design ID at the given index,
-        wraps it using PyVista for visualization, and then sets up a PyVista plotter to display the mesh.
-        """
-        row = self.data_frame.iloc[idx]
-        design_id = row["Design"]
-        geometry_path = os.path.join(self.root_dir, f"{design_id}.stl")
-        try:
-            mesh = trimesh.load(geometry_path, force="mesh")
-        except Exception as e:
-            logging.error(f"Failed to load STL file: {geometry_path}. Error: {e}")
-            raise
-        pv_mesh = pv.wrap(mesh)
-        plotter = pv.Plotter()
-        plotter.add_mesh(pv_mesh, color="lightgrey", show_edges=True)
-        plotter.add_axes()
-        camera_position = [
-            (-11.073024242161921, -5.621499358347753, 5.862225824910342),
-            (1.458462064391673, 0.002314306982062475, 0.6792134746589196),
-            (0.34000174095454166, 0.10379556639001211, 0.9346792479485448),
-        ]
-        plotter.camera_position = camera_position
-        plotter.show()
-
-    def visualize_mesh_withNode(self, idx):
-        """
-        Visualizes the mesh for a specific design from the dataset with nodes highlighted.
-
-        Args:
-            idx (int): Index of the design to visualize in the dataset.
-
-        This function loads the mesh from the STL file and highlights the nodes (vertices) of the mesh using spheres.
-        It uses seaborn to obtain visually distinct colors for the mesh and nodes.
-        """
-        row = self.data_frame.iloc[idx]
-        design_id = row["Design"]
-        geometry_path = os.path.join(self.root_dir, f"{design_id}.stl")
-        try:
-            mesh = trimesh.load(geometry_path, force="mesh")
-            pv_mesh = pv.wrap(mesh)
-        except Exception as e:
-            logging.error(f"Failed to load STL file: {geometry_path}. Error: {e}")
-            raise
-        plotter = pv.Plotter()
-        sns_blue = sns.color_palette("colorblind")[0]
-        plotter.add_mesh(
-            pv_mesh, color="lightgrey", show_edges=True, edge_color="black"
-        )
-        nodes = pv_mesh.points
-        plotter.add_points(
-            nodes, color=sns_blue, point_size=10, render_points_as_spheres=True
-        )
-        plotter.add_axes()
-        plotter.show()
-
-    def visualize_point_cloud(self, idx):
-        """
-        Visualizes the point cloud for a specific design from the dataset.
-
-        Args:
-            idx (int): Index of the design to visualize in the dataset.
-
-        This function retrieves the vertices for the specified design, converts them into a point cloud,
-        and uses the z-coordinate for color mapping. PyVista's Eye-Dome Lighting is enabled for improved depth perception.
-        """
-        vertices, _ = self.__getitem__(idx)
-        vertices = vertices.numpy()
-        point_cloud = pv.PolyData(vertices)
-        colors = vertices[:, 2]
-        point_cloud["colors"] = colors
-        plotter = pv.Plotter()
-        plotter.add_points(
-            point_cloud,
-            scalars="colors",
-            cmap="Blues",
-            point_size=3,
-            render_points_as_spheres=True,
-        )
-        plotter.enable_eye_dome_lighting()
-        plotter.add_axes()
-        camera_position = [
-            (-11.073024242161921, -5.621499358347753, 5.862225824910342),
-            (1.458462064391673, 0.002314306982062475, 0.6792134746589196),
-            (0.34000174095454166, 0.10379556639001211, 0.9346792479485448),
-        ]
-        plotter.camera_position = camera_position
-        plotter.show()
-
-    def visualize_augmentations(self, idx):
-        """
-        Visualizes various augmentations applied to the point cloud of a specific design in the dataset.
-
-        Args:
-            idx (int): Index of the sample in the dataset to be visualized.
-
-        This function retrieves the original point cloud for the specified design and then applies a series of augmentations,
-        including translation, jittering, and point dropping. Each version of the point cloud (original and augmented) is then
-        visualized in a 2x2 grid using PyVista to illustrate the effects of these augmentations.
-        """
-        vertices, _ = self.__getitem__(idx, apply_augmentations=False)
-        original_pc = pv.PolyData(vertices.numpy())
-        translated_pc = self.augmentation.translate_pointcloud(vertices.numpy())
-        jittered_pc = self.augmentation.jitter_pointcloud(translated_pc)
-        dropped_pc = self.augmentation.drop_points(jittered_pc)
-        plotter = pv.Plotter(shape=(2, 2))
-        plotter.subplot(0, 0)
-        plotter.add_text("Original Point Cloud", font_size=10)
-        plotter.add_mesh(original_pc, color="black", point_size=3)
-        plotter.subplot(0, 1)
-        plotter.add_text("Translated Point Cloud", font_size=10)
-        plotter.add_mesh(
-            pv.PolyData(translated_pc.numpy()), color="lightblue", point_size=3
-        )
-        plotter.subplot(1, 0)
-        plotter.add_text("Jittered Point Cloud", font_size=10)
-        plotter.add_mesh(
-            pv.PolyData(jittered_pc.numpy()), color="lightgreen", point_size=3
-        )
-        plotter.subplot(1, 1)
-        plotter.add_text("Dropped Point Cloud", font_size=10)
-        plotter.add_mesh(pv.PolyData(dropped_pc.numpy()), color="salmon", point_size=3)
-        plotter.show()
-
+``` py linenums="35"
+--8<--
+ppsci/data/dataset/drivaernet_dataset.py:35:261
+--8<--
 ```
 
 ### 3.2 RegDGCNN 模型
@@ -723,99 +334,30 @@ MODEL:
 
 由于我们以监督学习方式进行训练，此处采用监督约束 `SupervisedConstraint`：
 
-```py
-# 数据加载器配置
-train_dataloader_cfg = {
-    "dataset": {
-        "name": "DrivAerNetDataset",  # 使用的数据集名称，这里是 DrivAerNetDataset。
-        "root_dir": cfg.ARGS.dataset_path,  # 数据集所在的根目录路径，从配置文件中读取。
-        "input_keys": ("vertices",),  # 输入数据的关键字，这里是顶点数据（vertices）。
-        "label_keys": ("cd_value",),  # 标签数据的关键字，这里是空气阻力系数（cd_value）。
-        "weight_keys": ("weight_keys",),  # 用于加权损失函数的权重数据的关键字。
-        "subset_dir": cfg.ARGS.subset_dir,  # 子集目录，用于指定数据集的特定子集（可选）。
-        "ids_file": cfg.TRAIN.train_ids_file,  # 包含训练样本ID的文件，用于从数据集中选择特定样本。
-        "csv_file": cfg.ARGS.aero_coeff,  # 包含气动系数（如空气阻力系数等）的CSV文件。
-        "num_points": cfg.TRAIN.num_points  # 数据集中的点数，可能是点云数据中的点数量。
-    },
-}
-
-# 约束构建
-drivaernet_constraint = ppsci.constraint.SupervisedConstraint(
-    train_dataloader_cfg,  # 传入训练数据加载器配置
-    ppsci.loss.MSELoss("mean"),  # 使用均方误差损失函数（Mean Squared Error Loss）
-    name="DrivAerNet_constraint",  # 约束的名称，用于区分不同的约束
-)
-
+``` py linenums="34"
+--8<--
+examples/DrivAerNet/DrivAerNet.py:34:58
+--8<--
 ```
 
 ### 3.4 优化器构建
 
 优化器是模型训练中的关键部分，用于通过梯度下降法（或其他算法）调整模型参数。在本场景中，使用了`Adam`和`SGD`优化器，并通过学习率调度器来动态调整学习率。
 
-```py
-lr_scheduler = paddle.optimizer.lr.ReduceOnPlateau(
-    mode=cfg.TRAIN.scheduler.mode,          # 模式：'min' 或 'max'
-    patience=cfg.TRAIN.scheduler.patience,   # 触发学习率衰减的等待轮数
-    factor=cfg.TRAIN.scheduler.factor,       # 学习率衰减的比例
-    verbose=cfg.TRAIN.scheduler.verbose,     # 是否打印学习率调整信息
-    learning_rate=cfg.ARGS.lr                # 初始学习率
-)()
-
-# 根据配置选择优化器
-if cfg.ARGS.optimizer == 'adam':
-    # 使用 Adam 优化器
-    # Adam 是一种自适应学习率的优化算法，结合了 Momentum 和 RMSProp 的优点，通常在深度学习中表现良好。
-    optimizer = ppsci.optimizer.Adam(
-        lr_scheduler,                        # 学习率调度器
-        weight_decay=cfg.ARGS.weight_decay   # 权重衰减系数
-    )(model)
-else:
-    # 使用 SGD 优化器
-    # SGD（随机梯度下降）是最基础的优化算法，适用于简单的任务或需要更稳定的训练过程的情况。
-    optimizer = ppsci.optimizer.SGD(
-        lr_scheduler,                        # 学习率调度器
-        weight_decay=cfg.ARGS.weight_decay   # 权重衰减系数
-    )(model)
+``` py linenums="86"
+--8<--
+examples/DrivAerNet/DrivAerNet.py:86:109
+--8<--
 ```
 
 ### 3.5 评估器构建
 
 在训练过程中通常会按一定轮数间隔，用验证集（测试集）评估当前模型的训练情况，因此使用 `ppsci.validate.SupervisedValidator` 构建评估器。
 
-```py
-# 验证数据加载器配置
-valid_dataloader_cfg = {
-    "dataset": {
-        "name": "DrivAerNetDataset",  # 使用的数据集名称，这里是 DrivAerNetDataset。
-        "root_dir": cfg.ARGS.dataset_path,  # 数据集根目录路径，从配置文件中读取。
-        "input_keys": ("vertices",),  # 输入数据的关键字，这里是3D模型的顶点数据（vertices）。
-        "label_keys": ("cd_value",),  # 标签数据的关键字，这里是空气阻力系数（cd_value）。
-        "weight_keys": ("weight_keys",),  # 用于加权损失函数的权重数据的关键字。
-        "subset_dir": cfg.ARGS.subset_dir,  # 子集目录，指定使用数据集的子集。
-        "ids_file": cfg.TRAIN.eval_ids_file,  # 用于评估的数据样本ID文件。
-        "csv_file": cfg.ARGS.aero_coeff,  # 包含气动系数（如空气阻力系数等）的CSV文件。
-        "num_points": cfg.TRAIN.num_points  # 数据集中的点数，可能是点云数据中的点数量。
-    },
-    "batch_size": cfg.TRAIN.batch_size,  # 设置每个batch的样本数。
-    "sampler": {  # 设置数据采样器配置，指定数据如何进行批量划分。
-        "name": "BatchSampler",  # 使用批次采样器。
-        "drop_last": False,  # 是否丢弃最后一个batch（如果不满一批样本）。
-        "shuffle": True,  # 是否随机打乱数据顺序，通常为了增加训练的泛化能力。
-    },
-    "num_workers": cfg.TRAIN.num_workers,  # 数据加载的并行工作线程数，增加可以加速数据加载。
-}
-
-# 构建验证器
-drivaernet_valid = ppsci.validate.SupervisedValidator(
-    valid_dataloader_cfg,  # 传入验证数据加载器配置
-    loss=ppsci.loss.MSELoss("mean"),  # 使用均方误差损失函数（MSE Loss），用来评估模型在验证集上的表现
-    metric={"MSE": ppsci.metric.MSE()},  # 设置评估指标，这里是均方误差（MSE）。
-    name="DrivAerNet_valid",  # 设置验证器的名称，便于区分不同的验证器。
-)
-
-# 将验证器存入字典，方便后续调用和管理
-validator = {drivaernet_valid.name: drivaernet_valid}  # 将验证器添加到字典中，使用验证器名称作为键
-
+``` py linenums="60"
+--8<--
+examples/DrivAerNet/DrivAerNet.py:60:81
+--8<--
 ```
 
 评价指标 `metric` 选择 `ppsci.metric.MSE` 即可,也可根据需求自己选择其他评估指标。
@@ -824,229 +366,19 @@ validator = {drivaernet_valid.name: drivaernet_valid}  # 将验证器添加到�
 
 完成上述设置之后，只需要将上述实例化的对象按顺序传递给 `ppsci.solver.Solver`，然后启动训练、评估。
 
-```py
-# 初始化求解器
-solver = ppsci.solver.Solver(
-    model=model,  # 传入已定义的模型，用于训练和预测
-    constraint=constraint,  # 传入先前定义的约束（例如损失函数和数据加载器配置）
-    output_dir=cfg.output_dir,  # 训练结果的输出目录，保存模型权重、日志等文件
-    optimizer=optimizer,  # 传入优化器，用于更新模型参数
-    lr_scheduler=lr_scheduler,  # 传入学习率调度器，用于在训练过程中调整学习率
-    epochs=cfg.TRAIN.epochs,  # 设置训练的总轮数（epochs）
-    validator=validator,  # 传入验证器，用于在训练过程中评估模型性能
-    eval_during_train=cfg.TRAIN.eval_during_train,  # 是否在训练过程中进行评估
-    eval_with_no_grad=cfg.EVAL.eval_with_no_grad  # 是否在评估时禁用梯度计算（提高效率）
-)
-
-# 训练模型
-solver.train()  # 开始训练模型，使用配置的优化器、损失函数、数据等进行训练
-
-# 评估模型
-solver.eval()  # 在验证集上评估模型的性能
+``` py linenums="112"
+--8<--
+examples/DrivAerNet/DrivAerNet.py:112:128
+--8<--
 ```
 
 ## 4. 完整代码
 
 === "DrivAerNet.py"
-
-```py
-# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#     http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-import hydra
-from omegaconf import DictConfig
-from os import path as osp
-import paddle
-import ppsci
-from ppsci.utils import logger
-import warnings
-
-def train(cfg: DictConfig):
-    # set seed
-    ppsci.utils.misc.set_random_seed(cfg.TRAIN.seed)
-
-    # initialize logger
-    logger.init_logger("ppsci", osp.join(cfg.output_dir, "train.log"), "info")
-
-    # set model
-    model = ppsci.arch.RegDGCNN(input_keys=cfg.MODEL.input_keys,
-                                label_keys=cfg.MODEL.output_keys,
-                                weight_keys=cfg.MODEL.weight_keys,
-                                args=cfg.MODEL)
-
-    train_dataloader_cfg = {
-        "dataset": {
-            "name": "DrivAerNetDataset",
-            "root_dir": cfg.ARGS.dataset_path,
-            "input_keys": ("vertices",),
-            "label_keys": ("cd_value",),
-            "weight_keys": ("weight_keys",),
-            "subset_dir": cfg.ARGS.subset_dir,
-            "ids_file": cfg.TRAIN.train_ids_file,
-            "csv_file": cfg.ARGS.aero_coeff,
-            "num_points": cfg.TRAIN.num_points
-        },
-        "batch_size": cfg.TRAIN.batch_size,
-        "sampler": {
-            "name": "BatchSampler",
-            "drop_last": False,
-            "shuffle": True,
-        },
-        "num_workers": cfg.TRAIN.num_workers,
-    }
-
-    drivaernet_constraint = ppsci.constraint.SupervisedConstraint(
-        train_dataloader_cfg,
-        ppsci.loss.MSELoss("mean"),
-        name="DrivAerNet_constraint",
-    )
-
-    constraint = {drivaernet_constraint.name: drivaernet_constraint}
-
-    valid_dataloader_cfg = {
-        "dataset": {
-            "name": "DrivAerNetDataset",
-            "root_dir": cfg.ARGS.dataset_path,
-            "input_keys": ("vertices",),
-            "label_keys": ("cd_value",),
-            "weight_keys": ("weight_keys",),
-            "subset_dir": cfg.ARGS.subset_dir,
-            "ids_file": cfg.TRAIN.eval_ids_file,
-            "csv_file": cfg.ARGS.aero_coeff,
-            "num_points": cfg.TRAIN.num_points
-        },
-        "batch_size": cfg.TRAIN.batch_size,
-        "sampler": {
-            "name": "BatchSampler",
-            "drop_last": False,
-            "shuffle": True,
-        },
-        "num_workers": cfg.TRAIN.num_workers,
-    }
-
-    drivaernet_valid = ppsci.validate.SupervisedValidator(
-        valid_dataloader_cfg,
-        loss=ppsci.loss.MSELoss("mean"),
-        metric={"MSE": ppsci.metric.MSE()},
-        name="DrivAerNet_valid",
-    )
-
-    validator = {drivaernet_valid.name: drivaernet_valid}
-
-    # set optimizer
-    lr_scheduler = paddle.optimizer.lr.ReduceOnPlateau(mode=cfg.TRAIN.scheduler.mode,
-                                                       patience=cfg.TRAIN.scheduler.patience,
-                                                       factor=cfg.TRAIN.scheduler.factor,
-                                                       verbose=cfg.TRAIN.scheduler.verbose,
-                                                       learning_rate=cfg.ARGS.lr)()
-
-    optimizer = ppsci.optimizer.Adam(lr_scheduler, weight_decay=cfg.ARGS.weight_decay)(
-        model) if cfg.ARGS.optimizer == 'adam' else ppsci.optimizer.SGD(
-        lr_scheduler, weight_decay=cfg.ARGS.weight_decay)(model)
-
-    # initialize solver
-    solver = ppsci.solver.Solver(
-        model=model,
-        constraint=constraint,
-        output_dir=cfg.output_dir,
-        optimizer=optimizer,
-        lr_scheduler=lr_scheduler,
-        epochs=cfg.TRAIN.epochs,
-        validator=validator,
-        eval_during_train=cfg.TRAIN.eval_during_train,
-        eval_with_no_grad=cfg.EVAL.eval_with_no_grad
-    )
-
-    # train model
-    solver.train()
-
-    solver.eval()
-
-
-def evaluate(cfg: DictConfig):
-    # set seed
-    ppsci.utils.misc.set_random_seed(cfg.TRAIN.seed)
-
-    # initialize logger
-    logger.init_logger("ppsci", osp.join(cfg.output_dir, "eval.log"), "info")
-
-    # set model
-    model = ppsci.arch.RegDGCNN(input_keys=cfg.MODEL.input_keys,
-                                label_keys=cfg.MODEL.output_keys,
-                                weight_keys=cfg.MODEL.weight_keys,
-                                args=cfg.MODEL)
-
-    valid_dataloader_cfg = {
-        "dataset": {
-            "name": "DrivAerNetDataset",
-            "root_dir": cfg.ARGS.dataset_path,
-            "input_keys": ("vertices",),
-            "label_keys": ("cd_value",),
-            "weight_keys": ("weight_keys",),
-            "subset_dir": cfg.ARGS.subset_dir,
-            "ids_file": cfg.EVAL.ids_file,
-            "csv_file": cfg.ARGS.aero_coeff,
-            "num_points": cfg.EVAL.num_points
-        },
-        "batch_size": cfg.EVAL.batch_size,
-        "sampler": {
-            "name": "BatchSampler",
-            "drop_last": False,
-            "shuffle": False,
-        },
-        "num_workers": cfg.EVAL.num_workers,
-    }
-
-    drivaernet_valid = ppsci.validate.SupervisedValidator(
-        valid_dataloader_cfg,
-        loss=ppsci.loss.MSELoss("mean"),
-        metric={"MSE": ppsci.metric.MSE(),
-                "MAE": ppsci.metric.MAE(),
-                "Max AE": ppsci.metric.MaxAE(),
-                "R²": ppsci.metric.R2Score(),
-                },
-        name="DrivAerNet_valid",
-    )
-
-    validator = {drivaernet_valid.name: drivaernet_valid}
-
-    solver = ppsci.solver.Solver(
-        model=model,
-        validator=validator,
-        pretrained_model_path=cfg.EVAL.pretrained_model_path,
-        eval_with_no_grad=cfg.EVAL.eval_with_no_grad
-    )
-
-    # evaluate model
-    solver.eval()
-
-
-@hydra.main(version_base=None, config_path="./conf", config_name="DriveAerNet.yaml")
-def main(cfg: DictConfig):
-    warnings.filterwarnings("ignore")
-    if cfg.mode == "train":
-        train(cfg)
-    elif cfg.mode == "eval":
-        evaluate(cfg)
-    else:
-        raise ValueError(
-            f"cfg.mode should in ['train', 'eval'], but got '{cfg.mode}'"
-        )
-
-
-if __name__ == "__main__":
-    main()
+``` py linenums="15"
+--8<--
+examples/DrivAerNet/DrivAerNet.py:15:200
+--8<--
 ```
 
 ## 5. 结果展示
@@ -1073,7 +405,7 @@ RegDGCNN的另一个限制是，在当前形式下，对于大规模点云，Reg
 |          80           |                 15%                 |                    NULL                    |
 |          100          |                 13%                 |                   7.48%                    |
 
-![fig15](.\drivaernet\fig15.png)
+![fig15](https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/fig/fig15.png)
 
 图15：训练过程中的过程损失曲线变化。
 
@@ -1083,88 +415,88 @@ RegDGCNN的另一个限制是，在当前形式下，对于大规模点云，Reg
 
 参考文献列表
 
-1. [1] A. Abbas, A. Rafiee, M. Haase, and A. Malcolm. Geometrical deep learning for performance prediction of high-speed craft. Ocean Engineering, 258:111716, 2022.
+[1] A. Abbas, A. Rafiee, M. Haase, and A. Malcolm. Geometrical deep learning for performance prediction of high-speed craft. Ocean Engineering, 258:111716, 2022.
 
-2. [2] S. R. Ahmed, G. Ramm, and G. Faltin. Some salient features of the time -averaged ground vehicle wake. SAE Transactions, 93:473–503, 1984.
+[2] S. R. Ahmed, G. Ramm, and G. Faltin. Some salient features of the time -averaged ground vehicle wake. SAE Transactions, 93:473–503, 1984.
 
-3. [3] N. Arechiga, F. Permenter, B. Song, and C. Yuan. Drag-guided diffusion models for vehicle image generation. arXiv preprint arXiv:2306.09935, 6 2023.
+[3] N. Arechiga, F. Permenter, B. Song, and C. Yuan. Drag-guided diffusion models for vehicle image generation. arXiv preprint arXiv:2306.09935, 6 2023.
 
-4. [4] N. Ashton, P. Batten, A. Cary, and K. Holst. Summary of the 4th high-lift prediction workshop hybrid rans/les technology focus group. Journal of Aircraft, pages 1–30, 2023.
+[4] N. Ashton, P. Batten, A. Cary, and K. Holst. Summary of the 4th high-lift prediction workshop hybrid rans/les technology focus group. Journal of Aircraft, pages 1–30, 2023.
 
-5. [5] N. Ashton and W. van Noordt. Overview and summary of the first automotive cfd prediction workshop: Drivaer model. SAE International Journal of Commercial Vehicles, 16(02-16-01-0005), 2022.
+[5] N. Ashton and W. van Noordt. Overview and summary of the first automotive cfd prediction workshop: Drivaer model. SAE International Journal of Commercial Vehicles, 16(02-16-01-0005), 2022.
 
-6. [6] M. Aultman, Z. Wang, R. Auza-Gutierrez, and L. Duan. Evaluation of cfd methodologies for prediction of flows around simplified and complex automotive models. Computers & Fluids, 236:105297, 2022.
+[6] M. Aultman, Z. Wang, R. Auza-Gutierrez, and L. Duan. Evaluation of cfd methodologies for prediction of flows around simplified and complex automotive models. Computers & Fluids, 236:105297, 2022.
 
-7. [7] P. Baque, E. Remelli, F. Fleuret, and P. Fua. Geodesic convolutional shape optimization. In J. Dy and A. Krause, editors, Proceedings of the 35th International Conference on Machine Learning, volume 80 of Proceedings of Machine Learning Research, pages 472–481. PMLR, 10–15 Jul 2018.
+[7] P. Baque, E. Remelli, F. Fleuret, and P. Fua. Geodesic convolutional shape optimization. In J. Dy and A. Krause, editors, Proceedings of the 35th International Conference on Machine Learning, volume 80 of Proceedings of Machine Learning Research, pages 472–481. PMLR, 10–15 Jul 2018.
 
-8.  [8] F. Bonnet, J. Mazari, P. Cinnella, and P. Gallinari. Airfrans: High fidelity computational fluid dynamics dataset for approximating reynolds-averaged navier–stokes solutions. Advances in Neural Information Processing Systems, 35:23463–23478, 2022.
+[8] F. Bonnet, J. Mazari, P. Cinnella, and P. Gallinari. Airfrans: High fidelity computational fluid dynamics dataset for approximating reynolds-averaged navier–stokes solutions. Advances in Neural Information Processing Systems, 35:23463–23478, 2022.
 
-9. [9] C. Brand, J. Anable, I. Ketsopoulou, and J. Watson. Road to zero or road to nowhere? disrupting transport and energy in a zero carbon world. Energy Policy, 139:111334, 2020.
+[9] C. Brand, J. Anable, I. Ketsopoulou, and J. Watson. Road to zero or road to nowhere? disrupting transport and energy in a zero carbon world. Energy Policy, 139:111334, 2020.
 
-10. [10] A. X. Chang, T. Funkhouser, L. Guibas, P. Hanrahan, Q. Huang, Z. Li, S. Savarese, M. Savva, S. Song, H. Su, et al. Shapenet: An information-rich 3d model repository. arXiv preprint arXiv:1512.03012, 2015.
+[10] A. X. Chang, T. Funkhouser, L. Guibas, P. Hanrahan, Q. Huang, Z. Li, S. Savarese, M. Savva, S. Song, H. Su, et al. Shapenet: An information-rich 3d model repository. arXiv preprint arXiv:1512.03012, 2015.
 
-11. [11] A. Cogotti. A parametric study on the ground effect of a simplified car model. SAE transactions, pages 180–204, 1998.
+[11] A. Cogotti. A parametric study on the ground effect of a simplified car model. SAE transactions, pages 180–204, 1998.
 
-12. [12] G. Damblin, M. Couplet, and B. Iooss. Numerical studies of space-filling designs: optimization of latin hypercube samples and subprojection properties. Journal of Simulation, 7(4):276–289, 2013.
+[12] G. Damblin, M. Couplet, and B. Iooss. Numerical studies of space-filling designs: optimization of latin hypercube samples and subprojection properties. Journal of Simulation, 7(4):276–289, 2013.
 
-13. [13] J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei. Imagenet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition, pages 248–255. Ieee, 2009.
+[13] J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei. Imagenet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition, pages 248–255. Ieee, 2009.
 
-14. [14] M. Elrefaie, T. Ayman, M. A. Elrefaie, E. Sayed, M. Ayyad, and M. M. AbdelRahman. Surrogate modeling of the aerodynamic performance for airfoils in transonic regime. In AIAA SCITECH 2024 Forum, page 2220, 2024.
+[14] M. Elrefaie, T. Ayman, M. A. Elrefaie, E. Sayed, M. Ayyad, and M. M. AbdelRahman. Surrogate modeling of the aerodynamic performance for airfoils in transonic regime. In AIAA SCITECH 2024 Forum, page 2220, 2024.
 
-15. [15] M. Elrefaie, S. Hüttig, M. Gladkova, T. Gericke, D. Cremers, and C. Breitsamter. Real-time and on-site aerodynamics using stereoscopic piv and deep optical flow learning. arXiv preprint arXiv:2401.09932, 2024.
+[15] M. Elrefaie, S. Hüttig, M. Gladkova, T. Gericke, D. Cremers, and C. Breitsamter. Real-time and on-site aerodynamics using stereoscopic piv and deep optical flow learning. arXiv preprint arXiv:2401.09932, 2024.
 
-16. [16] E. Gunpinar, U. C. Coskun, M. Ozsipahi, and S. Gunpinar. A generative design and drag coefficient prediction system for sedan car side silhouettes based on computational fluid dynamics. CAD Computer Aided Design, 111:65–79, 6 2019.
+[16] E. Gunpinar, U. C. Coskun, M. Ozsipahi, and S. Gunpinar. A generative design and drag coefficient prediction system for sedan car side silhouettes based on computational fluid dynamics. CAD Computer Aided Design, 111:65–79, 6 2019.
 
-17. [17] A. I. Heft, T. Indinger, and N. A. Adams. Experimental and numerical investigation of the drivaer model. In Fluids Engineering Division Summer Meeting, volume 44755, pages 41–51. American Society of Mechanical Engineers, 2012.
+[17] A. I. Heft, T. Indinger, and N. A. Adams. Experimental and numerical investigation of the drivaer model. In Fluids Engineering Division Summer Meeting, volume 44755, pages 41–51. American Society of Mechanical Engineers, 2012.
 
-18. [18] A. I. Heft, T. Indinger, and N. A. Adams. Introduction of a new realistic generic car model for aerodynamic investigations. Technical report, SAE Technical Paper, 2012.
+[18] A. I. Heft, T. Indinger, and N. A. Adams. Introduction of a new realistic generic car model for aerodynamic investigations. Technical report, SAE Technical Paper, 2012.
 
-19. [19] S. J. Jacob, M. Mrosek, C. Othmer, and H. Köstler. Deep learning for realtime aerodynamic evaluations of arbitrary vehicle shapes. SAE International Journal of Passenger Vehicle Systems, 15(2):77–90, mar 2022.
+[19] S. J. Jacob, M. Mrosek, C. Othmer, and H. Köstler. Deep learning for realtime aerodynamic evaluations of arbitrary vehicle shapes. SAE International Journal of Passenger Vehicle Systems, 15(2):77–90, mar 2022.
 
-20. [20] A. Kashefi and T. Mukerji. Physics-informed pointnet: A deep learning solver for steady-state incompressible flows and thermal fields on multiple sets of irregular geometries. Journal of Computational Physics, 468:111510, 2022.
+[20] A. Kashefi and T. Mukerji. Physics-informed pointnet: A deep learning solver for steady-state incompressible flows and thermal fields on multiple sets of irregular geometries. Journal of Computational Physics, 468:111510, 2022.
 
-21. [21] D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980, 2014.
+[21] D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980, 2014.
 
-22. [22] Z. Li, N. B. Kovachki, C. Choy, B. Li, J. Kossaifi, S. P. Otta, M. A. Nabian, M. Stadler, C. Hundt, K. Azizzadenesheli, and A. Anandkumar. Geometryinformed neural operator for large-scale 3d pdes, 2023.
+[22] Z. Li, N. B. Kovachki, C. Choy, B. Li, J. Kossaifi, S. P. Otta, M. A. Nabian, M. Stadler, C. Hundt, K. Azizzadenesheli, and A. Anandkumar. Geometryinformed neural operator for large-scale 3d pdes, 2023.
 
-23. [23] H. Martins, C. Henriques, J. Figueira, C. Silva, and A. Costa. Assessing policy interventions to stimulate the transition of electric vehicle technology in the european union. Socio-Economic Planning Sciences, 87:101505, 2023.
+[23] H. Martins, C. Henriques, J. Figueira, C. Silva, and A. Costa. Assessing policy interventions to stimulate the transition of electric vehicle technology in the european union. Socio-Economic Planning Sciences, 87:101505, 2023.
 
-24. [24] F. R. Menter, M. Kuntz, R. Langtry, et al. Ten years of industrial experience with the sst turbulence model. Turbulence, heat and mass transfer, 4(1):625632, 2003.
+[24] F. R. Menter, M. Kuntz, R. Langtry, et al. Ten years of industrial experience with the sst turbulence model. Turbulence, heat and mass transfer, 4(1):625632, 2003.
 
-25. [25] P. Mock and S. Díaz. Pathways to decarbonization: the european passenger car market in the years 2021–2035. communications, 49:847129–848102, 2021.
+[25] P. Mock and S. Díaz. Pathways to decarbonization: the european passenger car market in the years 2021–2035. communications, 49:847129–848102, 2021.
 
-26. [26] T. Pfaff, M. Fortunato, A. Sanchez-Gonzalez, and P. W. Battaglia. Learning mesh-based simulation with graph networks. arXiv preprint arXiv:2010.03409, 2020.
+[26] T. Pfaff, M. Fortunato, A. Sanchez-Gonzalez, and P. W. Battaglia. Learning mesh-based simulation with graph networks. arXiv preprint arXiv:2010.03409, 2020.
 
-27. [27] C. R. Qi, H. Su, K. Mo, and L. J. Guibas. Pointnet: Deep learning on point sets for 3d classification and segmentation. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 652–660, 2017.
+[27] C. R. Qi, H. Su, K. Mo, and L. J. Guibas. Pointnet: Deep learning on point sets for 3d classification and segmentation. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 652–660, 2017.
 
-28. [28] E. Remelli, A. Lukoianov, S. Richter, B. Guillard, T. Bagautdinov, P. Baque, and P. Fua. Meshsdf: Differentiable iso-surface extraction. Advances in Neural Information Processing Systems, 33:22468–22478, 2020.
+[28] E. Remelli, A. Lukoianov, S. Richter, B. Guillard, T. Bagautdinov, P. Baque, and P. Fua. Meshsdf: Differentiable iso-surface extraction. Advances in Neural Information Processing Systems, 33:22468–22478, 2020.
 
-29. [29] T. Rios, B. Sendhoff, S. Menzel, T. Back, and B. V. Stein. On the efficiency of a point cloud autoencoder as a geometric representation for shape optimization. pages 791–798. Institute of Electrical and Electronics Engineers Inc., 12 2019.
+[29] T. Rios, B. Sendhoff, S. Menzel, T. Back, and B. V. Stein. On the efficiency of a point cloud autoencoder as a geometric representation for shape optimization. pages 791–798. Institute of Electrical and Electronics Engineers Inc., 12 2019.
 
-30. [30] T. Rios, B. V. Stein, T. Back, B. Sendhoff, and S. Menzel. Point2ffd: Learning shape representations of simulation-ready 3d models for engineering design optimization. pages 1024–1033. Institute of Electrical and Electronics Engineers Inc., 2021.
+[30] T. Rios, B. V. Stein, T. Back, B. Sendhoff, and S. Menzel. Point2ffd: Learning shape representations of simulation-ready 3d models for engineering design optimization. pages 1024–1033. Institute of Electrical and Electronics Engineers Inc., 2021.
 
-31. [31] T. Rios, B. van Stein, P. Wollstadt, T. Bäck, B. Sendhoff, and S. Menzel. Exploiting local geometric features in vehicle design optimization with 3d point cloud autoencoders. In 2021 IEEE Congress on Evolutionary Computation (CEC), pages 514–521, 2021.
+[31] T. Rios, B. van Stein, P. Wollstadt, T. Bäck, B. Sendhoff, and S. Menzel. Exploiting local geometric features in vehicle design optimization with 3d point cloud autoencoders. In 2021 IEEE Congress on Evolutionary Computation (CEC), pages 514–521, 2021.
 
-32. [32] T. Rios, P. Wollstadt, B. V. Stein, T. Back, Z. Xu, B. Sendhoff, and S. Menzel. Scalability of learning tasks on 3d cae models using point cloud autoencoders. pages 1367–1374. Institute of Electrical and Electronics Engineers Inc., 12 2019.
+[32] T. Rios, P. Wollstadt, B. V. Stein, T. Back, Z. Xu, B. Sendhoff, and S. Menzel. Scalability of learning tasks on 3d cae models using point cloud autoencoders. pages 1367–1374. Institute of Electrical and Electronics Engineers Inc., 12 2019.
 
-33. [33] F. Romor, M. Tezzele, M. Mrosek, C. Othmer, and G. Rozza. Multi-fidelity data fusion through parameter space reduction with applications to automotive engineering. International Journal for Numerical Methods in Engineering, 124(23):5293–5311, 2023.
+[33] F. Romor, M. Tezzele, M. Mrosek, C. Othmer, and G. Rozza. Multi-fidelity data fusion through parameter space reduction with applications to automotive engineering. International Journal for Numerical Methods in Engineering, 124(23):5293–5311, 2023.
 
-34. [34] A. Sanchez-Gonzalez, J. Godwin, T. Pfaff, R. Ying, J. Leskovec, and P. Battaglia. Learning to simulate complex physics with graph networks. In International conference on machine learning, pages 8459–8468. PMLR, 2020.
+[34] A. Sanchez-Gonzalez, J. Godwin, T. Pfaff, R. Ying, J. Leskovec, and P. Battaglia. Learning to simulate complex physics with graph networks. In International conference on machine learning, pages 8459–8468. PMLR, 2020.
 
-35. [35] Y. Shen, H. C. Patel, Z. Xu, and J. J. Alonso. Application of multi-fidelity transfer learning with autoencoders for efficient construction of surrogate models. In AIAA SCITECH 2024 Forum, page 0013, 2024.
+[35] Y. Shen, H. C. Patel, Z. Xu, and J. J. Alonso. Application of multi-fidelity transfer learning with autoencoders for efficient construction of surrogate models. In AIAA SCITECH 2024 Forum, page 0013, 2024.
 
-36. [36] B. Song, C. Yuan, F. Permenter, N. Arechiga, and F. Ahmed. Surrogate modeling of car drag coefficient with depth and normal renderings. arXiv preprint arXiv:2306.06110, 2023.
+[36] B. Song, C. Yuan, F. Permenter, N. Arechiga, and F. Ahmed. Surrogate modeling of car drag coefficient with depth and normal renderings. arXiv preprint arXiv:2306.06110, 2023.
 
-37. [37] D. B. Spalding. The numerical computation of turbulent flow. Comp. Methods Appl. Mech. Eng., 3:269, 1974.
+[37] D. B. Spalding. The numerical computation of turbulent flow. Comp. Methods Appl. Mech. Eng., 3:269, 1974.
 
-38. [38] N. Thuerey, K. Weißenow, L. Prantl, and X. Hu. Deep learning methods for reynolds-averaged navier–stokes simulations of airfoil flows. AIAA Journal, 58(1):25–36, 2020.
+[38] N. Thuerey, K. Weißenow, L. Prantl, and X. Hu. Deep learning methods for reynolds-averaged navier–stokes simulations of airfoil flows. AIAA Journal, 58(1):25–36, 2020.
 
-39. [39] T. L. Trinh, F. Chen, T. Nanri, and K. Akasaka. 3d super-resolution model for vehicle flow field enrichment. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision, pages 5826–5835, 2024.
+[39] T. L. Trinh, F. Chen, T. Nanri, and K. Akasaka. 3d super-resolution model for vehicle flow field enrichment. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision, pages 5826–5835, 2024.
 
-40. [40] N. Umetani and B. Bickel. Learning three-dimensional flow for interactive aerodynamic design. ACM Transactions on Graphics, 37, 2018.
+[40] N. Umetani and B. Bickel. Learning three-dimensional flow for interactive aerodynamic design. ACM Transactions on Graphics, 37, 2018.
 
-41. [41] M. Usama, A. Arif, F. Haris, S. Khan, S. K. Afaq, and S. Rashid. A data-driven interactive system for aerodynamic and user-centred generative vehicle design. In 2021 International Conference on Artificial Intelligence (ICAI), pages 119–127, 2021.
+[41] M. Usama, A. Arif, F. Haris, S. Khan, S. K. Afaq, and S. Rashid. A data-driven interactive system for aerodynamic and user-centred generative vehicle design. In 2021 International Conference on Artificial Intelligence (ICAI), pages 119–127, 2021.
 
-42. [42] Y. Wang, Y. Sun, Z. Liu, S. E. Sarma, M. M. Bronstein, and J. M. Solomon. Dynamic graph cnn for learning on point clouds. ACM Transactions on Graphics (tog), 38(5):1–12, 2019.
+[42] Y. Wang, Y. Sun, Z. Liu, S. E. Sarma, M. M. Bronstein, and J. M. Solomon. Dynamic graph cnn for learning on point clouds. ACM Transactions on Graphics (tog), 38(5):1–12, 2019.
 
-43. [43] D. Wieser, H.-J. Schmidt, S. Mueller, C. Strangfeld, C. Nayeri, and C. Paschereit. Experimental comparison of the aerodynamic behavior of fastback and notchback drivaer models. SAE International Journal of Passenger Cars-Mechanical Systems, 7(2014-01-0613):682–691, 2014.
+[43] D. Wieser, H.-J. Schmidt, S. Mueller, C. Strangfeld, C. Nayeri, and C. Paschereit. Experimental comparison of the aerodynamic behavior of fastback and notchback drivaer models. SAE International Journal of Passenger Cars-Mechanical Systems, 7(2014-01-0613):682–691, 2014.

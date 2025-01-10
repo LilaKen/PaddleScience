@@ -11,5 +11,6 @@
         - OptimizerList
         - RMSProp
         - SGD
+        - ReduceOnPlateau
       show_root_heading: true
       heading_level: 3

@@ -165,8 +165,8 @@ def get_graph_feature(x, k=20, idx=None):
         .transpose(perm=[0, 3, 1, 2])
         .contiguous()
     )
-    # del x, idx, idx_base
-    # paddle.device.cuda.empty_cache()
+    del x, idx, idx_base
+    paddle.device.cuda.empty_cache()
     return feature
 
 
@@ -294,16 +294,16 @@ class RegDGCNN(paddle.nn.Layer):
 
         x = get_graph_feature(x, k=self.k)
         x = self.conv1(x)
-        x1 = x.max(axis=-1, keepdim=False)[0]
+        x1 = x.max(axis=-1, keepdim=False)
         x = get_graph_feature(x1, k=self.k)
         x = self.conv2(x)
-        x2 = x.max(axis=-1, keepdim=False)[0]
+        x2 = x.max(axis=-1, keepdim=False)
         x = get_graph_feature(x2, k=self.k)
         x = self.conv3(x)
-        x3 = x.max(axis=-1, keepdim=False)[0]
+        x3 = x.max(axis=-1, keepdim=False)
         x = get_graph_feature(x3, k=self.k)
         x = self.conv4(x)
-        x4 = x.max(axis=-1, keepdim=False)[0]
+        x4 = x.max(axis=-1, keepdim=False)
         x = paddle.concat(x=(x1, x2, x3, x4), axis=1)
         x = self.conv5(x)
         x1 = paddle.nn.functional.adaptive_max_pool1d(x=x, output_size=1).reshape(

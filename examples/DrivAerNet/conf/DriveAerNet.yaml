@@ -38,7 +38,7 @@ MODEL:
 
 # training settings
 TRAIN:
-  seed: 1
+  iters_per_epoch: 2776
   num_points: 5000
   epochs: 100
   num_workers: 32
@@ -57,18 +57,19 @@ TRAIN:
 EVAL:
   num_points: 5000
   batch_size: 2
-  pretrained_model_path: "CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams"
+  pretrained_model_path: "https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams"
   eval_with_no_grad: True
   ids_file: "test_design_ids.txt"
-  num_workers: 0
+  num_workers: 32
 
-ARGS:
-  cuda: True
-  # optimizer settings
+# optimizer settings
+optimizer:
   weight_decay: 0.0001
   lr: 0.001
   optimizer: 'adam'
+
+ARGS:
   # dataset settings
-  dataset_path: '../fsi/DrivAerNetPlusPlus_Processed_Point_Clouds_100k_paddle'
-  aero_coeff: '../fsi/AeroCoefficients_DrivAerNet_FilteredCorrected.csv'
-  subset_dir: '../fsi/subset_dir'
+  dataset_path: 'data/DrivAerNet_Processed_Point_Clouds_5k_paddle'
+  aero_coeff: 'data/AeroCoefficients_DrivAerNet_FilteredCorrected.csv'
+  subset_dir: 'data/subset_dir'
