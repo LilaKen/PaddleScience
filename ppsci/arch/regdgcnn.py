@@ -32,7 +32,9 @@ Parts of this code are modified from the original version authored by Yue Wang
 
 from __future__ import annotations
 
+from typing import Dict
 from typing import Tuple
+
 
 import numpy as np
 import paddle
