@@ -32,9 +32,7 @@ Parts of this code are modified from the original version authored by Yue Wang
 
 from __future__ import annotations
 
-from typing import Dict
 from typing import Tuple
-
 
 import numpy as np
 import paddle
@@ -174,11 +172,20 @@ def get_graph_feature(x, k=20, idx=None):
 
 
 class RegDGCNN(paddle.nn.Layer):
-    """
-    Deep Graph Convolutional Neural Network for Regression Tasks (RegDGCNN) for processing 3D point cloud data.
+    """Deep Graph Convolutional Neural Network for Regression Tasks (RegDGCNN) designed to process 3D point cloud data.
 
     This network architecture extracts hierarchical features from point clouds using graph-based convolutions,
     enabling effective learning of spatial structures.
+
+    Args:
+        input_keys (Tuple[str, ...]): Keys for input data fields.
+        label_keys (Tuple[str, ...]): Keys for label data fields.
+        weight_keys (Tuple[str, ...]): Keys for weight data fields.
+        args (dict): Configuration parameters including:
+            - 'k' (int): Number of neighbors for graph convolution.
+            - 'emb_dims' (int): Embedding dimensions for feature aggregation.
+            - 'dropout' (float): Dropout rate for regularization.
+        output_channels (int, optional): Number of output channels. Defaults to 1.
     """
 
     def __init__(
@@ -189,14 +196,7 @@ class RegDGCNN(paddle.nn.Layer):
         args: dict,
         output_channels=1,
     ):
-        """
-        Initializes the RegDGCNN model with specified configurations.
 
-        Args:
-            args (dict): Configuration parameters including 'k' for the number of neighbors, 'emb_dims' for embedding
-            dimensions, and 'dropout' rate.
-            output_channels (int): Number of output channels (e.g., for drag prediction, this is 1).
-        """
         super(RegDGCNN, self).__init__()
         self.input_keys = input_keys
         self.label_keys = label_keys
