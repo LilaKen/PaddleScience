@@ -816,8 +816,7 @@ class ReduceOnPlateau(LRBase):
         warmup_epoch (int, optional): The epoch numbers for LinearWarmup. Defaults to 0.
         warmup_start_lr (float, optional): Start learning rate within warmup. Defaults to 0.0.
         mode (str, optional): One of `min` or `max`. In `min` mode, lr will be reduced when the quantity monitored has stopped decreasing; in `max` mode it will be reduced when the quantity monitored has stopped increasing. Defaults to "min".
-        patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced. Defaults to 2日晚间编辑已停止响应...
-
+        patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced. Defaults to 20.
         factor (float, optional): Factor by which the learning rate will be reduced. new_lr = lr * factor. Defaults to 1e-4.
         verbose (bool, optional): If True, prints a message to stdout for each update. Defaults to True.
         by_epoch (bool, optional): Learning rate decays by epoch when by_epoch is True, else by iter. Defaults to True.
