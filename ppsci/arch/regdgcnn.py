@@ -268,7 +268,8 @@ class RegDGCNN(paddle.nn.Layer):
             x (paddle.Tensor): Input tensor representing a batch of point clouds.
 
         Returns:
-            paddle.Tensor: Model predictions for the input batch.
+            Dict[str, paddle.Tensor]: Model predictions for the input batch.
+
         """
 
         x = x[self.input_keys[0]]
