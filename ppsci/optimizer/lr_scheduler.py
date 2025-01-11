@@ -806,6 +806,35 @@ class LambdaDecay(LRBase):
 
 
 class ReduceOnPlateau(LRBase):
+    """This interface provides a learning rate scheduler that reduces the learning rate when a metric has stopped improving.
+
+    Args:
+        epochs (int): Total epoch(s).
+        iters_per_epoch (int): Number of iterations within an epoch.
+        learning_rate (float): Initial learning rate.
+        last_epoch (int, optional): The index of the last epoch. Defaults to -1.
+        warmup_epoch (int, optional): The epoch numbers for LinearWarmup. Defaults to 0.
+        warmup_start_lr (float, optional): Start learning rate within warmup. Defaults to 0.0.
+        mode (str, optional): One of `min` or `max`. In `min` mode, lr will be reduced when the quantity monitored has stopped decreasing; in `max` mode it will be reduced when the quantity monitored has stopped increasing. Defaults to "min".
+        patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced. Defaults to 2日晚间编辑已停止响应...
+
+        factor (float, optional): Factor by which the learning rate will be reduced. new_lr = lr * factor. Defaults to 1e-4.
+        verbose (bool, optional): If True, prints a message to stdout for each update. Defaults to True.
+        by_epoch (bool, optional): Learning rate decays by epoch when by_epoch is True, else by iter. Defaults to True.
+
+    Examples:
+        >>> import ppsci
+        >>> lr_scheduler = ppsci.optimizer.lr_scheduler.ReduceOnPlateau(
+        ...     epochs=50,
+        ...     iters_per_epoch=100,
+        ...     learning_rate=0.1,
+        ...     mode='min',
+        ...     patience=10,
+        ...     factor=0.5,
+        ...     verbose=True
+        ... )()
+    """
+    
     def __init__(
         self,
         epochs: int,
