@@ -825,7 +825,7 @@ class ReduceOnPlateau(LRBase):
         >>> import ppsci
         >>> lr = ppsci.optimizer.lr_scheduler.ReduceOnPlateau(epochs=50, iters_per_epoch=100, learning_rate=0.1, mode='min', patience=10, factor=0.5, verbose=True)()
     """
-    
+
     def __init__(
         self,
         epochs: int,
