@@ -34,11 +34,45 @@ import pandas as pd
 
 
 class DrivAerNetDataset(paddle.io.Dataset):
-    """
+"""
     Paddle Dataset class for the DrivAerNet dataset, handling loading, transforming, and augmenting 3D car models.
 
     This dataset is specifically designed for aerodynamic tasks, including training machine learning models
     to predict aerodynamic coefficients such as drag coefficient (Cd) from 3D car models.
+
+    Args:
+        input_keys (Tuple[str, ...]): Tuple specifying the keys for input features.
+            These keys correspond to the attributes of the dataset used as input to the model.
+            For example, "vertices" represents the 3D point cloud vertices of car models.
+        label_keys (Tuple[str, ...]): Tuple specifying the keys for ground-truth labels.
+            These keys correspond to the target values, such as aerodynamic coefficients like Cd.
+            Example: ("cd_value",)
+        weight_keys (Tuple[str, ...]): Tuple specifying the keys for optional sample weights.
+            These keys represent weighting factors that may be used to adjust loss computation
+            during model training. Useful for handling sample imbalance.
+            Example: ("weight_keys",)
+        subset_dir (str): Path to the directory containing subset information.
+            This directory typically contains files that divide the dataset into training,
+            validation, and test subsets using a list of model IDs.
+        ids_file (str): Path to the text file containing model IDs for the current subset.
+            Each line in the file corresponds to a unique model ID that defines which
+            models belong to the subset (e.g., training set or test set).
+        root_dir (str): Directory containing the STL files of 3D car models.
+            Each STL file is expected to represent a single car model and is named according
+            to the corresponding model ID. This is the primary data source.
+        csv_file (str): Path to the CSV file containing metadata for car models.
+            This file typically includes aerodynamic properties (e.g., drag coefficient)
+            and other descriptive attributes mapped to each model ID.
+        num_points (int): Fixed number of points to sample from each 3D model.
+            If a 3D model has more points than `num_points`, it will be randomly subsampled.
+            If it has fewer points, it will be zero-padded to reach the desired number.
+        transform (Optional[Callable]): An optional callable for applying data transformations.
+            This can include augmentations such as scaling, rotation, jittering, or other preprocessing
+            steps applied to the 3D point clouds before they are passed to the model.
+        pointcloud_exist (bool): Whether the point clouds are pre-processed and saved as `.pt` files.
+            If `True`, the dataset will directly load the pre-saved point clouds instead of generating them from STL files.
+        train_fractions (float): Fraction of the training data to use. Useful for experiments where only a portion of the data is needed.
+        mode (str): Mode of operation, either "train", "eval", or "test". Determines how the dataset behaves.
 
     Examples:
         >>> import ppsci
@@ -53,48 +87,6 @@ class DrivAerNetDataset(paddle.io.Dataset):
         ...     num_points=1024,
         ...     transform=None,
         ... )  # doctest: +SKIP
-    """
-
-    """
-    Initializes the DrivAerNetDataset instance.
-
-    Args:
-        input_keys (Tuple[str, ...]): Tuple specifying the keys for input features.
-            These keys correspond to the attributes of the dataset used as input to the model.
-            For example, "vertices" represents the 3D point cloud vertices of car models.
-
-        label_keys (Tuple[str, ...]): Tuple specifying the keys for ground-truth labels.
-            These keys correspond to the target values, such as aerodynamic coefficients like Cd.
-            Example: ("cd_value",)
-
-        weight_keys (Tuple[str, ...]): Tuple specifying the keys for optional sample weights.
-            These keys represent weighting factors that may be used to adjust loss computation
-            during model training. Useful for handling sample imbalance.
-            Example: ("weight_keys",)
-
-        subset_dir (str): Path to the directory containing subset information.
-            This directory typically contains files that divide the dataset into training,
-            validation, and test subsets using a list of model IDs.
-
-        ids_file (str): Path to the text file containing model IDs for the current subset.
-            Each line in the file corresponds to a unique model ID that defines which
-            models belong to the subset (e.g., training set or test set).
-
-        root_dir (str): Directory containing the STL files of 3D car models.
-            Each STL file is expected to represent a single car model and is named according
-            to the corresponding model ID. This is the primary data source.
-
-        csv_file (str): Path to the CSV file containing metadata for car models.
-            This file typically includes aerodynamic properties (e.g., drag coefficient)
-            and other descriptive attributes mapped to each model ID.
-
-        num_points (int): Fixed number of points to sample from each 3D model.
-            If a 3D model has more points than `num_points`, it will be randomly subsampled.
-            If it has fewer points, it will be zero-padded to reach the desired number.
-
-        transform (Optional[Callable]): An optional callable for applying data transformations.
-            This can include augmentations such as scaling, rotation, jittering, or other preprocessing
-            steps applied to the 3D point clouds before they are passed to the model.
     """
 
     def __init__(
