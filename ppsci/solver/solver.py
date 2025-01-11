@@ -166,7 +166,7 @@ class Solver:
             # (Recommended)Params can be passed within cfg
             # rather than passed to 'Solver.__init__' one-by-one.
             self._parse_params_from_cfg(cfg)
-        self.cur_metric = 0
+
         # set model
         self.model = model
         # set constraint
@@ -327,6 +327,7 @@ class Solver:
                 self.model, self.pretrained_model_path, self.equation
             )
 
+        self.cur_metric = float("inf")
         # initialize an dict for tracking best metric during training
         self.best_metric = {
             "metric": float("inf"),
