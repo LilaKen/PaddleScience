@@ -15,13 +15,13 @@ DrivAerNet: A Parametric Car Dataset for Data-Driven Aerodynamic Design and Grap
 === "模型训练命令"
 
     ``` sh
-    python DrivAerNet.py
+    python drivaernet.py
     ```
 
 === "模型评估命令"
 
     ``` sh
-    python DrivAerNet.py mode=eval EVAL.pretrained_model_path=https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams
+    python drivaernet.py mode=eval EVAL.pretrained_model_path=https://dataset.bj.bcebos.com/PaddleScience/DNNFluid-Car/DrivAer/CdPrediction_DrivAerNet_r2_100epochs_5k_best_model.pdparams
     ```
 
 ## 1. 背景简介
@@ -332,7 +332,7 @@ MODEL:
 
 ``` py linenums="34"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:34:58
+examples/drivaernet/drivaernet.py:34:58
 --8<--
 ```
 
@@ -342,7 +342,7 @@ examples/DrivAerNet/DrivAerNet.py:34:58
 
 ``` py linenums="86"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:86:109
+examples/drivaernet/drivaernet.py:86:109
 --8<--
 ```
 
@@ -352,7 +352,7 @@ examples/DrivAerNet/DrivAerNet.py:86:109
 
 ``` py linenums="60"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:60:81
+examples/drivaernet/drivaernet.py:60:81
 --8<--
 ```
 
@@ -364,16 +364,16 @@ examples/DrivAerNet/DrivAerNet.py:60:81
 
 ``` py linenums="112"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:112:128
+examples/drivaernet/drivaernet.py:112:128
 --8<--
 ```
 
 ## 4. 完整代码
 
-=== "DrivAerNet.py"
+=== "drivaernet.py"
 ``` py linenums="15"
 --8<--
-examples/DrivAerNet/DrivAerNet.py:15:200
+examples/drivaernet/drivaernet.py:15:200
 --8<--
 ```
 
