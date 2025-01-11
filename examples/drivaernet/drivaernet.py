@@ -23,7 +23,6 @@ import ppsci
 
 
 def train(cfg: DictConfig):
-
     # set model
     model = ppsci.arch.RegDGCNN(
         input_keys=cfg.MODEL.input_keys,
