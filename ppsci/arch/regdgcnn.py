@@ -30,6 +30,7 @@ EdgeConv operations, and global feature aggregation, to robustly learn from grap
 Parts of this code are modified from the original version authored by Yue Wang
 """
 
+from __future__ import annotations
 
 from typing import Tuple
 
