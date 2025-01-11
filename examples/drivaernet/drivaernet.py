@@ -138,7 +138,6 @@ def train(cfg: DictConfig):
 
 
 def evaluate(cfg: DictConfig):
-
     # set model
     model = ppsci.arch.RegDGCNN(
         input_keys=cfg.MODEL.input_keys,
