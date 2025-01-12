@@ -76,6 +76,7 @@ nav:
           - NSFNet4: zh/examples/nsfnet4.md
           - ViV: zh/examples/viv.md
           - DrivAerNet: zh/examples/drivaernet.md
+          - DrivAerNetPlusPlus: zh/examples/drivaernetplusplus.md
         - 结构:
           - Biharmonic2D: zh/examples/biharmonic2d.md
           - Bracket: zh/examples/bracket.md

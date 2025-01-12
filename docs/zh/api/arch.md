@@ -18,7 +18,6 @@
         - DGMR
         - Discriminator
         - ExtFormerMoECuboid
-        - FNO1d
         - Generator
         - HEDeepONets
         - LorenzEmbedding
@@ -31,12 +30,12 @@
         - TFNO1dNet
         - TFNO2dNet
         - TFNO3dNet
-        - Transformer
         - UNetEx
         - UNONet
         - USCNN
         - LNO
         - TGCN
         - RegDGCNN
+        - RegPointNet
       show_root_heading: true
       heading_level: 3
