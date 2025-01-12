@@ -566,16 +566,16 @@ class Solver:
             if self.ema_model and epoch_id % self.avg_freq == 0:
                 self.ema_model.update()
 
-            cur_metric = float("inf")
+            self.cur_metric = float("inf")
             # evaluate during training
             if (
                 self.eval_during_train
                 and epoch_id % self.eval_freq == 0
                 and epoch_id >= self.start_eval_epoch
             ):
-                cur_metric, metric_dict_group = self.eval(epoch_id)
-                if cur_metric < self.best_metric["metric"]:
-                    self.best_metric["metric"] = cur_metric
+                self.cur_metric, metric_dict_group = self.eval(epoch_id)
+                if self.cur_metric < self.best_metric["metric"]:
+                    self.best_metric["metric"] = self.cur_metric
                     self.best_metric["epoch"] = epoch_id
                     save_load.save_checkpoint(
                         self.model,
@@ -646,7 +646,7 @@ class Solver:
                 save_load.save_checkpoint(
                     self.model,
                     self.optimizer,
-                    {"metric": cur_metric, "epoch": epoch_id},
+                    {"metric": self.cur_metric, "epoch": epoch_id},
                     self.scaler,
                     self.output_dir,
                     f"epoch_{epoch_id}",
@@ -659,7 +659,7 @@ class Solver:
             save_load.save_checkpoint(
                 self.model,
                 self.optimizer,
-                {"metric": cur_metric, "epoch": epoch_id},
+                {"metric": self.cur_metric, "epoch": epoch_id},
                 self.scaler,
                 self.output_dir,
                 "latest",
