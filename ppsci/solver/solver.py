@@ -566,7 +566,6 @@ class Solver:
             if self.ema_model and epoch_id % self.avg_freq == 0:
                 self.ema_model.update()
 
-            self.cur_metric = float("inf")
             # evaluate during training
             if (
                 self.eval_during_train
