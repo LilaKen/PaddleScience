@@ -192,7 +192,7 @@ def forward(self, x):
     """
     Forward pass of the network.
 
-    Parameters:
+    Args:
         x (Tensor): Input tensor of shape (batch_size, 3, num_points).
 
     Returns:
