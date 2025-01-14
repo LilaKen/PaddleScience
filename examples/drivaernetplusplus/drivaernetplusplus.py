@@ -24,7 +24,6 @@ import ppsci
 
 
 def train(cfg: DictConfig):
-
     # set model
     model = ppsci.arch.RegPointNet(
         input_keys=cfg.MODEL.input_keys,
@@ -135,7 +134,6 @@ def train(cfg: DictConfig):
 
 
 def evaluate(cfg: DictConfig):
-
     # set model
     model = ppsci.arch.RegPointNet(
         input_keys=cfg.MODEL.input_keys,

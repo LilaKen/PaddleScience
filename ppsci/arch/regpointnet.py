@@ -127,14 +127,6 @@ def __init__(
     weight_keys: Tuple[str, ...],
     args,
 ):
-    """
-    Initialize the RegPointNet model for regression tasks with enhanced complexity,
-    including additional layers and residual connections.
-
-    Parameters:
-        emb_dims (int): Dimensionality of the embedding space.
-        dropout (float): Dropout probability.
-    """
     super(RegPointNet, self).__init__()
     self.input_keys = input_keys
     self.label_keys = label_keys
@@ -204,7 +196,7 @@ def forward(self, x):
         x (Tensor): Input tensor of shape (batch_size, 3, num_points).
 
     Returns:
-        Tensor: Output tensor of the predicted scalar value.
+        paddle.Tensor: Output tensor of the predicted scalar value.
     """
 
     x = x[self.input_keys[0]]

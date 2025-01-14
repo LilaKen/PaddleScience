@@ -137,34 +137,6 @@ class DrivAerNetPlusPlusDataset(paddle.io.Dataset):
         """Returns the total number of samples in the dataset."""
         return len(self.data_frame)
 
-    def min_max_normalize(self, data: paddle.Tensor) -> paddle.Tensor:
-        """
-        Normalizes the data to the range [0, 1] based on min and max values.
-        """
-        min_vals, _ = data.min(axis=0, keepdim=True)
-        max_vals, _ = data.max(axis=0, keepdim=True)
-        normalized_data = (data - min_vals) / (max_vals - min_vals)
-        return normalized_data
-
-    def z_score_normalize(self, data: paddle.Tensor) -> paddle.Tensor:
-        """
-        Normalizes the data using z-score normalization (standard score).
-        """
-        mean_vals = data.mean(axis=0, keepdim=True)
-        std_vals = data.std(axis=0, keepdim=True)
-        normalized_data = (data - mean_vals) / std_vals
-        return normalized_data
-
-    def mean_normalize(self, data: paddle.Tensor) -> paddle.Tensor:
-        """
-        Normalizes the data to the range [-1, 1] based on mean and range.
-        """
-        mean_vals = data.mean(axis=0, keepdim=True)
-        min_vals, _ = data.min(axis=0, keepdim=True)
-        max_vals, _ = data.max(axis=0, keepdim=True)
-        normalized_data = (data - mean_vals) / (max_vals - min_vals)
-        return normalized_data
-
     def _sample_or_pad_vertices(
         self, vertices: paddle.Tensor, num_points: int
     ) -> paddle.Tensor:

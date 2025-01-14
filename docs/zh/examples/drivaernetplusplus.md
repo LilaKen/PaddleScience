@@ -2,7 +2,7 @@
 
 DrivAerNet++: A Large-Scale Multimodal Car Dataset with Computational Fluid Dynamics Simulations and Deep Learning Benchmarks(DrivAerNet++：一个包含计算流体力学模拟和深度学习基准的大规模多模态汽车数据集)
 
-## 论文信息:
+## 论文信息
 | 年份 | 会议                                                         | 作者                                                   | 引用数 | 论文PDF                                                      |
 | ---- | ------------------------------------------------------------ | ------------------------------------------------------ | ------ | ------------------------------------------------------------ |
 | 2024 | Conference and Workshop on Neural Information Processing Systems | Mohamed Elrefaie, Florin Morar, Angela Dai, Faez Ahmed | 4      | DrivAerNet++: A Large-Scale Multimodal Car Dataset with Computational Fluid Dynamics Simulations and Deep Learning Benchmarks |
@@ -423,7 +423,7 @@ stl源数据集下载教程参考，从[数据集下载地址](https://dataverse
 
 DrivAerNet++ 提供了一个用于汽车空气动力学性能预测的多模态数据集，任务目标是基于输入数据预测汽车的空气阻力系数（$C_d$）。
 
-##### 输入 ：
+##### 输入
 
 输入数据包括以下多模态信息：
 
@@ -431,7 +431,7 @@ DrivAerNet++ 提供了一个用于汽车空气动力学性能预测的多模态�
 2. **设计参数**：参数化汽车设计的向量表示，记为：   $\mathbf{p} \in \mathbb{R}^d,$  其中：   - $d$ 是设计参数的数量（例如 26-50 个参数），用于描述车身类型、底盘配置、轮胎设计等特征。
 3. **附加流场数据（可选）**：   - 表面压力场：$\mathbf{p_s}(x)$。   - 表面速度场：$\mathbf{u}(x) = (u, v, w)$。 不属于本案例，本案例仅涉及空气阻力系数（$C_d$）预测。
 
-##### 任务目标 ：
+##### 任务目标
 
 目标是构建一个深度学习模型 $f(\cdot)$，输入点云数据 $x$ ，预测汽车的空气阻力系数 $C_d$，即：
 
@@ -441,7 +441,7 @@ $$
 
 其中： - $\hat{C}_d$ 是模型预测的空气阻力系数。 - $C_d$ 是真实的空气阻力系数。 模型需要学习点云的几何信息的相关性，精准预测阻力系数。
 
-##### 评估指标 ：
+##### 评估指标
 
 模型的性能通过以下指标进行评估：
 
