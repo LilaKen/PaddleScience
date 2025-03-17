@@ -62,9 +62,11 @@ from ppsci.utils import logger  # isort:skip
 from ppsci.arch.regdgcnn import RegDGCNN  # isort:skip
 from ppsci.arch.regpointnet import RegPointNet  # isort:skip
 from ppsci.arch.ifm_mlp import IFMMLP  # isort:skip
+from ppsci.arch.transolver import Transolver  # isort:skip
 
 __all__ = [
     "MoFlowNet",
+    "Transolver",
     "MoFlowProp",
     "AFNONet",
     "AMGNet",

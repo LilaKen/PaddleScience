@@ -22,7 +22,7 @@ hydra:
     subdir: ./
 
 # general settings
-mode: eval
+mode: train
 seed: 1
 output_dir: ${hydra:run.dir}
 log_freq: 100
@@ -32,12 +32,16 @@ MODEL:
   input_keys: ["vertices"]
   output_keys: ["cd_value"]
   weight_keys: ["weight_keys"]
-  dropout: 0.0
-  emb_dims: 1024
-  channels: [6, 64, 128, 256, 512, 1024]
-  linear_sizes: [128, 64, 32, 16]
-  k: 40
-  output_channels: 1
+  n_layers: 8
+  n_hidden: 256
+  space_dim: 3
+  fun_dim: 0
+  n_head: 8
+  mlp_ratio: 2
+  out_dim: 1
+  slice_num: 32
+  unified_pos: 0
+  act: "gelu"
 
 # training settings
 TRAIN:
@@ -48,7 +52,7 @@ TRAIN:
   eval_during_train: True
   train_ids_file: "train_design_ids.txt"
   eval_ids_file: "val_design_ids.txt"
-  batch_size: 4
+  batch_size: 3
   scheduler:
     mode: "min"
     patience: 20
