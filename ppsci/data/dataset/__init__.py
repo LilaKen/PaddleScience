@@ -28,12 +28,12 @@ from ppsci.data.dataset.cylinder_dataset import MeshCylinderDataset
 from ppsci.data.dataset.darcyflow_dataset import DarcyFlowDataset
 from ppsci.data.dataset.dgmr_dataset import DGMRDataset
 from ppsci.data.dataset.drivaernet_dataset import DrivAerNetDataset
-from ppsci.data.dataset.drivaernetplusplus_dataset import DrivAerNetPlusPlusDataset
 from ppsci.data.dataset.enso_dataset import ENSODataset
 from ppsci.data.dataset.era5_dataset import ERA5Dataset
 from ppsci.data.dataset.era5_dataset import ERA5SampledDataset
 from ppsci.data.dataset.ext_moe_enso_dataset import ExtMoEENSODataset
 from ppsci.data.dataset.fwi_dataset import FWIDataset
+from ppsci.data.dataset.ifm_moe_dataset import IFMMoeDataset
 from ppsci.data.dataset.mat_dataset import IterableMatDataset
 from ppsci.data.dataset.mat_dataset import MatDataset
 from ppsci.data.dataset.moflow_dataset import MOlFLOWDataset
@@ -41,14 +41,19 @@ from ppsci.data.dataset.mrms_dataset import MRMSDataset
 from ppsci.data.dataset.mrms_dataset import MRMSSampledDataset
 from ppsci.data.dataset.npz_dataset import IterableNPZDataset
 from ppsci.data.dataset.npz_dataset import NPZDataset
+from ppsci.data.dataset.pems_dataset import PEMSDataset
 from ppsci.data.dataset.radar_dataset import RadarDataset
 from ppsci.data.dataset.sevir_dataset import SEVIRDataset
 from ppsci.data.dataset.spherical_swe_dataset import SphericalSWEDataset
-from ppsci.data.dataset.transolver_shapenetcar_dataset import ShapeNetCarDataset
 from ppsci.data.dataset.trphysx_dataset import CylinderDataset
 from ppsci.data.dataset.trphysx_dataset import LorenzDataset
 from ppsci.data.dataset.trphysx_dataset import RosslerDataset
 from ppsci.data.dataset.vtu_dataset import VtuDataset
+from ppsci.data.dataset.transolver_standardbenchmark_darcy_dataset import DarcyDataset
+from ppsci.data.dataset.transolver_standardbenchmark_elas_dataset import ElasticityDataset
+from ppsci.data.dataset.transolver_standardbenchmark_ns_dataset import NavierStokesDataset
+from ppsci.data.dataset.transolver_standardbenchmark_pipe_dataset import PipeDataset
+from ppsci.data.dataset.transolver_standardbenchmark_plas_dataset import PlasDataset
 from ppsci.data.process import transform
 from ppsci.utils import logger
 
@@ -61,6 +66,11 @@ __all__ = [
     "ContinuousNamedArrayDataset",
     "ChipHeatDataset",
     "CSVDataset",
+    "DarcyDataset",
+    "ElasticityDataset",
+    "NavierStokesDataset",
+    "PipeDataset",
+    "PlasDataset",
     "IterableCSVDataset",
     "ERA5Dataset",
     "ERA5SampledDataset",
@@ -71,6 +81,7 @@ __all__ = [
     "MRMSSampledDataset",
     "IterableNPZDataset",
     "NPZDataset",
+    "PEMSDataset",
     "CylinderDataset",
     "LorenzDataset",
     "RadarDataset",
@@ -89,8 +100,7 @@ __all__ = [
     "CGCNNDataset",
     "FWIDataset",
     "DrivAerNetDataset",
-    "DrivAerNetPlusPlusDataset",
-    "ShapeNetCarDataset",
+
 ]
 
 

@@ -327,11 +327,21 @@ class Solver:
                 self.model, self.pretrained_model_path, self.equation
             )
 
+        self.cur_metric = float("inf")
         # initialize an dict for tracking best metric during training
         self.best_metric = {
             "metric": float("inf"),
             "epoch": 0,
         }
+
+        # use loss aggregator, use Sum if None
+        if isinstance(loss_aggregator, (mtl.AGDA, mtl.PCGrad)) and self.use_amp:
+            raise ValueError(
+                "Auto Mix Precision do not support AGDA, PCGrad loss aggregator yet, "
+                "please set use_amp=False."
+            )
+        self.loss_aggregator = loss_aggregator or mtl.Sum()
+
         # load model checkpoint, usually used for resume training
         if not cfg:
             self.checkpoint_path = checkpoint_path
@@ -425,6 +435,7 @@ class Solver:
         self.wandb_writer = None
         if not cfg:
             self.use_wandb = use_wandb
+            self.wandb_config = {}
         if self.use_wandb:
             try:
                 import wandb
@@ -434,7 +445,7 @@ class Solver:
                 )
             with misc.RankZeroOnly(self.rank) as is_master:
                 if is_master:
-                    self.wandb_writer = wandb.init(**wandb_config)
+                    self.wandb_writer = wandb.init(**self.wandb_config)
 
         # set TensorBoardX tool
         self.tbd_writer = None
@@ -475,16 +486,12 @@ class Solver:
         self.forward_helper = expression.ExpressionSolver()
 
         # whether enable static for forward pass. Defaults to False
-        jit.enable_to_static(to_static)
-        logger.message(f"Set to_static={to_static} for computational optimization.")
-
-        # use loss aggregator, use Sum if None
-        if isinstance(loss_aggregator, (mtl.AGDA, mtl.PCGrad)) and self.use_amp:
-            raise ValueError(
-                "Auto Mix Precision do not support AGDA, PCGrad loss aggregator yet, "
-                "please set use_amp=False."
-            )
-        self.loss_aggregator = loss_aggregator or mtl.Sum()
+        if not cfg:
+            self.to_static = to_static
+        jit.enable_to_static(self.to_static)
+        logger.message(
+            f"Set to_static={self.to_static} for computational optimization."
+        )
 
         # convert sympy to callable object if exist
         extra_parameters = []
@@ -564,16 +571,15 @@ class Solver:
             if self.ema_model and epoch_id % self.avg_freq == 0:
                 self.ema_model.update()
 
-            cur_metric = float("inf")
             # evaluate during training
             if (
                 self.eval_during_train
                 and epoch_id % self.eval_freq == 0
                 and epoch_id >= self.start_eval_epoch
             ):
-                cur_metric, metric_dict_group = self.eval(epoch_id)
-                if cur_metric < self.best_metric["metric"]:
-                    self.best_metric["metric"] = cur_metric
+                self.cur_metric, metric_dict_group = self.eval(epoch_id)
+                if self.cur_metric < self.best_metric["metric"]:
+                    self.best_metric["metric"] = self.cur_metric
                     self.best_metric["epoch"] = epoch_id
                     save_load.save_checkpoint(
                         self.model,
@@ -644,7 +650,7 @@ class Solver:
                 save_load.save_checkpoint(
                     self.model,
                     self.optimizer,
-                    {"metric": cur_metric, "epoch": epoch_id},
+                    {"metric": self.cur_metric, "epoch": epoch_id},
                     self.scaler,
                     self.output_dir,
                     f"epoch_{epoch_id}",
@@ -657,7 +663,7 @@ class Solver:
             save_load.save_checkpoint(
                 self.model,
                 self.optimizer,
-                {"metric": cur_metric, "epoch": epoch_id},
+                {"metric": self.cur_metric, "epoch": epoch_id},
                 self.scaler,
                 self.output_dir,
                 "latest",
@@ -916,7 +922,6 @@ class Solver:
             self.model,
             input_spec=input_spec,
             full_graph=full_graph,
-            ignore_module=ignore_modules,
         )
 
         # save static graph model to disk

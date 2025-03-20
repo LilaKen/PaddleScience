@@ -1,0 +1,87 @@
+defaults:
+  - ppsci_default
+  - TRAIN: train_default
+  - TRAIN/ema: ema_default
+  - TRAIN/swa: swa_default
+  - EVAL: eval_default
+  - INFER: infer_default
+  - _self_
+
+hydra:
+  run:
+    # dynamic output directory according to running time and override name
+    dir: outputs_VIV/${now:%Y-%m-%d}/${now:%H-%M-%S}/${hydra.job.override_dirname}
+  job:
+    name: ${mode} # name of logfile
+    chdir: false # keep current working directory unchanged
+  callbacks:
+    init_callback:
+      _target_: ppsci.utils.callbacks.InitCallback
+  sweep:
+    # output directory for multirun
+    dir: ${hydra.run.dir}
+    subdir: ./
+
+# general settings
+mode: eval # running mode: train/eval
+seed: 42
+output_dir: ${hydra:run.dir}
+log_freq: 100
+step: 1
+
+
+# model settings
+MODEL:
+  input_keys: [ "input" ]
+  output_keys: [ "label" ]
+  weight_keys: [ "label" ]
+  n_layers: 8  # 对应于 Transolver 的 n_layers 参数
+  n_hidden: 128  # 对应于 Transolver 的 n_hidden 参数
+  space_dim: 2  # 空间维度
+  fun_dim: 0  # 功能维度
+  n_heads: 8  # 多头注意力机制中的头数
+  mlp_ratio: 1  # MLP 层的扩展比例
+  out_dim: 1  # 输出维度
+  slice_num: 64  # 切片数量
+  unified_pos: 0  # 是否使用统一的位置编码
+  dropout: 0.0
+  Time_Input: False
+  ref: 8
+  act: 'gelu'
+
+TRAIN:
+  epochs: 500  # 这是原始代码中的 nb_epochs 超参数值
+  iters_per_epoch: 1  # 每个 epoch 的迭代次数，这里设置为 1
+  save_freq: 10000  # 每 10000 次迭代保存一次模型
+  eval_during_train: true  # 训练期间进行评估
+  eval_freq: 10  # 每 10 个 epoch 进行一次评估（val_iter 设置为 10）
+  batch_size: 1  # 使用 batch_size 为 1
+  learning_rate: 0.001  # 学习率，等于你的代码中设置的 lr
+  step_size: 20000  # 每 20000 步调整一次学习率
+  gamma: 0.9  # 学习率衰减系数
+  lr: 0.001
+  weight_decay: 1e-05
+  pretrained_model_path: null  # 暂不使用预训练模型
+  checkpoint_path: null  # 暂不指定检查点路径
+  # training dataset
+  data_path: "fno/elasticity/Meshes"
+  ntrain: 1000
+  ntest: 200
+  mode_train: "train"
+  mode_eval: "eval"
+  num_workers: 32
+
+
+# evaluation settings
+EVAL:
+  pretrained_model_path: "elas_Transolver.pdparams"
+  batch_size: 1
+  data_path: "fno/elasticity/Meshes"
+  num_workers: 32
+  ntrain: 1000
+  ntest: 200
+  mode: "eval"
+
+
+
+
